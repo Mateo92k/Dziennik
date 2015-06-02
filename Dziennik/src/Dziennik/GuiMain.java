@@ -71,15 +71,20 @@ import java.util.List;
     public class GuiMain 
     {	  
   
-		private static JButton bModulKlas, bModulOcen, bModulObecnosci, bHome, bWyloguj, bSzukaj;
-    	private static JLabel lblInformacje, lblRokSzkolny, lblAktualnyPrzedmiot, lblObecnychStudentow, lblSeparator,lblSeparator2, lblTime,lblDay, lblVersion;
+		private static JButton bModulKlas, bWyloguj;
+    	private static JLabel lblSeparator,lblSeparator2;
       
     	String strTime = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime());
     	String strDay = new SimpleDateFormat("dd-MM-yyyy").format(Calendar.getInstance().getTime());
   
     	final String zalogowanoJako = "Zalogowano jako: ";
-		public String imie, nazwisko, wychowankowie, nazwaFolderuUzytkownika, persona;
-		public String[] uczeKlasy, wszystkieKlasy;
+		public static String imieUzytkownika;
+		public static String nazwiskoUzytkownika;
+		public String klasaPodopiecznaUzytkownika;
+		public String nazwaFolderuUzytkownika;
+		public String imieInazwisko;
+		public String userName;
+		public String[] tabKlasKtoreUzytkownikuczy, tabWszystkichKlasWTejSzkole;
 		public String[] args = {};
 		//zmienna przechowujaca przedmioty tej klasy, w konstruktorze dopisac by pobieral te przedmioty z plku
 		public String[] przedmioty = {"Polski", "Geografia", "Matematyka"};
@@ -87,8 +92,8 @@ import java.util.List;
     	public JMenuBar createJMenuBar()  
     	{
     		JMenuBar mainMenuBar;
-    		JMenu menuPlik, menuWidok, menuNowy, menuPrzejdz, menuNarzedzia, menuPomoc;
-    		JMenuItem NowyMenuItem, OtworzBazeMenuItem, ZapiszMenuItem, Odswie¿MenuItem, DrukujMenuItem, WylogujMenuItem, WyjdzMenuItem ;
+    		JMenu menuPlik, menuWidok, menuNowy, menuNarzedzia, menuPomoc;
+    		JMenuItem NowyMenuItem, ZapiszMenuItem, Odswie¿MenuItem, DrukujMenuItem, WylogujMenuItem, WyjdzMenuItem ;
     		
     		mainMenuBar = new JMenuBar();
     		menuPlik = new JMenu("Plik");
@@ -131,23 +136,24 @@ import java.util.List;
  
     	//  String nazwaFolderu, imie, nazwisko, String[]listaWszystkichklas, []listaKlasKtorychUcze, String klasaKtoraWychowuje
     	//(nazwaFolderu, imie, nazwisko, listaWszystkichKlas, listaKlasKtorychUcze, wychowujeKlase);
-    	private void createGui(String folderName, String firstName, String lastName, String[] listOfAllClass, String[] listClassIteach, String KlasaWychowankowie) 
+    	private void createGui(String sciezkaFolderuUzytkownika, String i, String n, String[] listOfAllClass, String[] listClassIteach, String KlasaWychowankowie) 
     	{
     		//tworzenie podkreslenia
 //    		Font font = nazwaKonkretnegoObiektu.getFont();
 //    		Map attributes = font.getAttributes();
 //    		attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
 //    		bWyloguj.setFont(font.deriveFont(attributes));
-    		
-    		nazwaFolderuUzytkownika = folderName;
-    		imie = firstName; 
-    		nazwisko = lastName;
-    		wszystkieKlasy = listOfAllClass;
-    		uczeKlasy = listClassIteach;
-    		wychowankowie = KlasaWychowankowie;
-    		persona = imie + " " + nazwisko; 
+    		 
+    		nazwaFolderuUzytkownika = sciezkaFolderuUzytkownika;
+    		userName = sciezkaFolderuUzytkownika;
+    		imieUzytkownika = i; 
+    		nazwiskoUzytkownika = n;
+    		tabWszystkichKlasWTejSzkole = listOfAllClass;
+    		tabKlasKtoreUzytkownikuczy = listClassIteach;
+    		klasaPodopiecznaUzytkownika = KlasaWychowankowie;
+    		imieInazwisko = imieUzytkownika + " " + nazwiskoUzytkownika; 
     		//frame settings..
-    		JFrame frame = new JFrame("Dziennik Elektroniczny - Okienko startowe");
+    		JFrame frame = new JFrame("G³ówne okno - Dziennik Elektroniczny");
     		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     		GuiMain app = new GuiMain();
     		frame.setJMenuBar(app.createJMenuBar());
@@ -194,8 +200,7 @@ import java.util.List;
     		p1.setLayout(new BoxLayout(p1, BoxLayout.X_AXIS)); // ustawienie ikon w lini poziomej
     		p1.setBackground(Color.WHITE);
    
-    		//tworzenie komponentow do panelu1
-    		ImageIcon seppion = new ImageIcon("/res/seppion.png");
+    		new ImageIcon("/res/seppion.png");
     		
     		JLabel lblLogo = new JLabel();
     		lblLogo.setCursor(new Cursor(Cursor.HAND_CURSOR)); 
@@ -205,7 +210,7 @@ import java.util.List;
                 public void mouseClicked(MouseEvent evt)
                 {
                 	GuiMain gm = new GuiMain();
-                	gm.createDirectoryIfNeeded(persona);
+                	gm.loadDataAndRunApp(imieInazwisko);
                 	System.out.println("Powrót do g³ównego okna."); 
                 }
             });
@@ -219,7 +224,7 @@ import java.util.List;
                 	frame.dispose();
                 	System.out.println("Powinno otworzyc TwojeKlasy.java ");  
                 	TwojeKlasy tk = new TwojeKlasy();
-					tk.wczytajDane(folderName, firstName, lastName, listOfAllClass, listClassIteach, KlasaWychowankowie);
+					tk.wczytajDane(sciezkaFolderuUzytkownika, imieUzytkownika, nazwiskoUzytkownika, tabWszystkichKlasWTejSzkole, tabKlasKtoreUzytkownikuczy, klasaPodopiecznaUzytkownika);
 //					for (int i = 0 ; i < uczeKlasy.length ; i ++)
 //					{
 //						System.out.println(uczeKlasy[i]); 
@@ -228,7 +233,7 @@ import java.util.List;
                 }
             });
     		
-    		JLabel lblDaneZalogowanego = new JLabel(persona);
+    		JLabel lblDaneZalogowanego = new JLabel(imieInazwisko);
     		lblDaneZalogowanego.setIcon(new ImageIcon(Wyszukiwanie.class.getResource("/res/usericonm.png")));
      
 
@@ -256,14 +261,14 @@ import java.util.List;
     			public void actionPerformed(ActionEvent e) {
     				frame.dispose();
     				JOptionPane.showMessageDialog(null, "Wylogowano.");
-    				Logowanie.runClassLogowanie();
+    				Logowanie.runClassLogowanie(null, null);
     			}
     		});
     		
     		//tworzenie podkreslenia
     		
-
-	    	final JComboBox comboBox = new JComboBox(uczeKlasy);
+    		//TODO: zmieniæ na : final JComboBox comboBox = new JComboBox(uczeKlasy);
+	    	final JComboBox comboBox = new JComboBox(tabKlasKtoreUzytkownikuczy);
 	    	comboBox.setCursor(new Cursor(Cursor.HAND_CURSOR)); 
     		comboBox.setRenderer(  new MyComboBoxRenderer("Wybierz dziennik klasy której uczysz"));
     		comboBox.setPreferredSize(new Dimension(90, 30));
@@ -344,7 +349,7 @@ import java.util.List;
         	                	 try
         	                	 { 
             	                	PlanLekcji pl = new PlanLekcji();
-            	                	pl.wczytajDane(persona, firstName, lastName, listOfAllClass, listClassIteach, KlasaWychowankowie);
+            	                	pl.wczytajDane(imieInazwisko, imieUzytkownika, nazwiskoUzytkownika, listOfAllClass, listClassIteach, KlasaWychowankowie);
             	                	frame.dispose();
         	                	 } catch (Exception ex ) {System.out.println("Blad przy wyborze cbx1" + ex);}
          	                }
@@ -371,6 +376,9 @@ import java.util.List;
         	                {
         	                	//uruchom oceny sem I
         	                	 System.out.println("uruchom oceny sem I");
+        	                	 System.out.println("imie nazwisko " + imieUzytkownika + " " + nazwiskoUzytkownika );
+        	                	 DziennikOcen dziennikOcen = new DziennikOcen(); 
+        	                	 dziennikOcen.createGui(imieInazwisko, imieUzytkownika, nazwiskoUzytkownika, listOfAllClass, listClassIteach, KlasaWychowankowie);
          	                }
         	               
         	                
@@ -405,7 +413,7 @@ import java.util.List;
         	                {
         	                	String przedmiot = opt3[0];
         	                	 ListaObecnosci lo = new ListaObecnosci();
-        	                	 lo.createGui(persona, strDay, przedmiot);
+        	                	 lo.createGui(imieInazwisko, strDay, przedmiot);
          	                }
         	               
         	                
@@ -527,7 +535,7 @@ import java.util.List;
                 @Override
                 public void actionPerformed(ActionEvent e)
                 {
-                	ZarzadzanieKlasami(persona);
+                	ZarzadzanieKlasami(imieInazwisko);
                 	frame.setVisible(false);
                 }
             });
@@ -586,7 +594,7 @@ import java.util.List;
  			ss.setBounds(odlegloscLeft-2, odlegloscOdP2+25, 440, 322);
  			ss.setBackground(Color.white);
  		  
- 			JLabel lblUzupelnijProfil = new JLabel("Aby korzystaæ ze wszystkich funkcjonalnoœci przejdŸ do zak³adki 'Moje Klasy' i uzupe³nij dane");
+ 			JLabel lblUzupelnijProfil = new JLabel("Uzupe³nij profil");
   			lblUzupelnijProfil.setBounds(450,50,640,15);
  			lblUzupelnijProfil.setForeground(hrefColor);
  			lblUzupelnijProfil.setIcon(new ImageIcon(Wyszukiwanie.class.getResource("/res/addClassM.png ")));
@@ -616,15 +624,15 @@ import java.util.List;
  			JLabel[] labels = new JLabel[dlugosc_tablicy];
  			 
 			//petla wypisujaca terminarz i umieszczajaca go w panelu centralnym
-			for (int i = 0; i < terminarzGodzina.length; i++)
+			for (int i1 = 0; i1 < terminarzGodzina.length; i1++)
 				{
 						
-                        labels[i] = new JLabel();
-                        labels[i].setBounds(odlegloscLeft+10,temp+odlegloscOdP2,340,50);
-                        labels[i].setText(terminarzGodzina[i]+ "  "  + terminarzPrzedmiot[i]+ "  "  + terminarzKlasa[i]);
-                        labels[i].setForeground(new Color(128, 87, 140));
-                        ss.add(labels[i]);                        
-                        pCenter.add(labels[i]);
+                        labels[i1] = new JLabel();
+                        labels[i1].setBounds(odlegloscLeft+10,temp+odlegloscOdP2,340,50);
+                        labels[i1].setText(terminarzGodzina[i1]+ "  "  + terminarzPrzedmiot[i1]+ "  "  + terminarzKlasa[i1]);
+                        labels[i1].setForeground(new Color(128, 87, 140));
+                        ss.add(labels[i1]);                        
+                        pCenter.add(labels[i1]);
                         temp +=20; 
 				}
 				 
@@ -697,7 +705,7 @@ import java.util.List;
     		Font font = new Font("default", Font.HANGING_BASELINE, 14);
     		Map  attributes = font.getAttributes();
     		attributes.put(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON);
-    		Font newFont = new Font(attributes);  
+    		new Font(attributes);  
     		lblWydarzenia.setFont(font.deriveFont(attributes));
      
 			for (int a = 0; a < wydarzeniaDzisGodzina.length; a++)
@@ -767,8 +775,9 @@ import java.util.List;
     		            }
     		});
     		
-     	 	if(uczeKlasy==null)
+     	 	if(tabKlasKtoreUzytkownikuczy[0]==null)  
     		{
+     	 	 
     			comboBox.setEnabled(false);  
     			comboBox.setSize(800, comboBox.getHeight());
     			comboBox.setRenderer(  new MyComboBoxRenderer("Wybierz dziennik swojej klasy:(niedostêpne)"));
@@ -779,7 +788,8 @@ import java.util.List;
      	 		btnUzupelnijListeKlas.setPreferredSize(new Dimension(108, 108));  
      	 		frame.add(btnUzupelnijListeKlas);
     		}
-     
+     	 
+     	 	
      		//Jpanel informacyjny dolny
      		JPanel pDolny = new JPanel( new FlowLayout(FlowLayout.CENTER));
      		//komponenty
@@ -814,76 +824,47 @@ import java.util.List;
     		public void run()
     			{
     			  
-    				GuiMain gm = new GuiMain(); 
-    				gm.createDirectoryIfNeeded("Michal Klich");
+    				GuiMain gm = new GuiMain();  
+    				gm.loadDataAndRunApp("X Y");
     				 
     			} 
     		});
     	}
+    		
+    	 
     		 
-    		protected void createDirectoryIfNeeded(String fullname)
+    		protected void loadDataAndRunApp(String iN)
     		{   
-    			
-    		  String nazwaFolderu = ("c:\\dziennik\\users\\"+ fullname);
-    		  File userDirName = new File("c:\\dziennik\\users\\"+ fullname);
-    		  File programDataPath = new File("c:\\dziennik\\data");
-    		  String imie, nazwisko, wiek, telefon, wychowujeKlase;
-    		  String[] listaWszystkichKlas, listaKlasKtorychUcze;
-    		  String[] splitStr = fullname.split("\\s+");
-    		  imie = splitStr[0];
-    		  nazwisko = splitStr[1]; 
+    		  String imieInazwisko = iN;
+    		  System.out.println("Info: zmienna 'String imieInazwisko':" + imieInazwisko);
+    		  //TOhere: dot¹d dzia³a planowo. 
+    		  String strSciezkaFolderuUzytkownika = ("c:\\DziennikElektroniczny\\users\\"+ imieInazwisko);
+    		  File fKatalogKontaUzytkownika = new File(strSciezkaFolderuUzytkownika);
     		  
+    		  File fKatalogDanychAplikacji = new File("c:\\DziennikElektroniczny\\data");
+    		  String imieUzytkownika, nazwiskoUzytkownika, klasaPodOpiecznaUzytkownika;
+    		  String[] zbiorWszystkichKlasZeSzkoly, zbiorKlasKtoreUczyUzytkownik;
+    		  String[] splitStr = iN.split("\\s+");
+    		  imieUzytkownika = splitStr[0];
+    		  nazwiskoUzytkownika = splitStr[1]; 
     		  
-    		  
-    		  //stwórz folder z danymi programu jesli nie istnieje
-    		  if (!programDataPath.exists()) 
-    		  {
-    			  programDataPath.mkdir();
-    			  if(programDataPath.isDirectory() && programDataPath.exists())
+
+    			 //sciezka do pliku txt, gdzie przechowywaa jest lista klas które uczy zalogowany u¿ytkownik.
+    			  File fUczyKlasy = new File("C:/DziennikElektroniczny/users/" + imieUzytkownika + " " + nazwiskoUzytkownika + "/uczyKlasy.txt.txt"); 
+    			  if(fUczyKlasy.length()==0)
     			  {
-    			  		System.out.println("Tworzenie pliku z danymi programu przebieglo pomyslnie");
-    			  		File PathToClassesData = new File("c:\\dziennik\\data\\klasa\\");
-    			  		PathToClassesData.mkdir();
+    				  System.out.println("Zosta³eœ przekierowany do okna z mo¿liwoœci¹ rejestracji i logowania. Zaloguj siê by uruchomiæ pozosta³e okna (klasy) aplikacji.");
     			  }
-    		  }
-    		  
-    		  
-    		  // jesli zalogowany uzytkownik nie ma folderu uzytkownika stwórz go.
-    		  if (!userDirName.exists()) 
-    		  {
-      		    System.out.println("Nowy uzytkownik(nie wykryto folderu)");
-    		    System.out.println("Stworzono folder: " + fullname);
-    		    userDirName.mkdir();
-    		    
-    		    /**uruchom app przekazuj¹c parametry tj:
-    		    *	Imie, Nazwisko, ListaWszystkichKlas, ListaKlasKtorychUczy, NazwaKlasyWychowywanej, IloscUczniow,
-    		    */
-    		    
-    		    listaWszystkichKlas = null;
-    		    listaKlasKtorychUcze = null;
-    		    wychowujeKlase = null; 
-    		    new GuiMain().createGui(nazwaFolderu, imie, nazwisko, listaWszystkichKlas, listaKlasKtorychUcze, wychowujeKlase); // uruchom program przekazuj¹c parametry:
-    		  }
-    		  
-    		  //jesli uzytkownik istnieje
-    		  if (userDirName.exists()) 
-    		  { 
-    			 System.out.println("Uzytkownik istnieje w bazie(Ma istniej¹cy folder o nazwie)" + fullname + ", scie¿ka: c:\\dziennik\\users\\");
-    			 
-    			 //sciezka do pliku txt, gdzie przechowywane powinna byæ list klas zalogowanego u¿ytkownika, których on uczy. 
-    			  File fKlasy = new File("C:/dziennik/users/Michal Klich/uczyKlasy.txt.txt"); 
-    			 // File fileStudentOfThisTeacher = new File("C:/dziennik/users/" + fullname + "/StudentsOfThisTeacher.txt.txt");
-    			  //czy istnieje plik txt z list¹ klas zalogowanego uzytkownika
-    			  if (fKlasy.exists() && !fKlasy.isDirectory())
+    			  if (fUczyKlasy.exists() && !fUczyKlasy.isDirectory())
     				  
     			  { 
-    				  if(fKlasy.length()!=0)
+    				  if(fUczyKlasy.length()!=0)
     				  try {
     					
     					//oblicz ile uzytkownik ma klas(czyli  ile wierszy jest w pliku uczyKlasy.txt)
     					int liczbaKlas=0;
     					//BufferedReader in = new BufferedReader(new FileReader(fKlasy.toString()));
-    					BufferedReader in = new BufferedReader(new FileReader("C:\\dziennik\\users\\Michal Klich\\uczyKlasy.txt.txt"));
+    					BufferedReader in = new BufferedReader(new FileReader("C:\\DziennikElektroniczny\\users\\" + imieUzytkownika + " " + nazwiskoUzytkownika + "\\uczyKlasy.txt.txt"));
     					while (in.readLine() != null) liczbaKlas++;
     					//in.close();
     					System.out.println("Plik ma lini: " + liczbaKlas);
@@ -893,7 +874,7 @@ import java.util.List;
     					System.out.println("Stworzono zmienna 'string uczyKlasy'");
     					
     					//Dodaj klasy z pliku txt do zmiennej tablicowej String
-						Scanner fileIn = new Scanner(new File("c:\\dziennik\\users\\"+ fullname + "\\uczyKlasy.txt.txt"));
+						Scanner fileIn = new Scanner(new File("c:\\DziennikElektroniczny\\users\\"+ iN + "\\uczyKlasy.txt.txt"));
 						System.out.println("Stworzono zmienna 'Scanner fileIn '");
 						
 						List<String> list = new ArrayList<String>();
@@ -926,11 +907,13 @@ import java.util.List;
 						
 						 System.out.println("Zamknieto strumien I/o"); 
 						 //uruchomienie programu z parametrami pobranymi z I/O(klasy etc.)
-						 new GuiMain().createGui(nazwaFolderu, imie, nazwisko, null, uczyKlasy, null); 
+						 new GuiMain().createGui(strSciezkaFolderuUzytkownika, imieUzytkownika, nazwiskoUzytkownika, null, uczyKlasy, null); 
+				
+			 
     					   
     				  } catch (FileNotFoundException e) {
     					  
-						System.out.print("Plik jest pusty lub nieprawid³owy " + e);
+						System.out.print("Plik z list¹ klas nie jest pusty i b³¹d przy odczytywaniu go. " + e);
     				  } catch (IOException e) {
     					  System.out.println("Blad podczas liczenia lini: " + e);
 						// TODO Auto-generated catch block
@@ -938,20 +921,23 @@ import java.util.List;
 					}
     				  else 
     					  {
-    					  
+    					  //uczeKlasy[0] = null;
     					  	System.out.println("Uzytkownik nie ma zapisanych w pliku ¿adnych klas które by uczy³");
-    					  	new GuiMain().createGui(nazwaFolderu, imie, nazwisko, null, null, null); 
+    					  	new GuiMain().createGui(strSciezkaFolderuUzytkownika, imieUzytkownika, nazwiskoUzytkownika, null, tabKlasKtoreUzytkownikuczy, null); 
+    					  	System.out.println("Uruchomiono(2)");
+    					  	
     					  }
     			// jesli nie istnieje
     			  }
     			  else //uzytkownik istnieje ale nie posiada klas
+    				  //uczeKlasy[0] = null;
     				  {
-    				  System.out.println("U¿ytkownik nie posiada pliku .txt z nazwami klas które móg³by uczyæ " + fKlasy);
-    				  new GuiMain().createGui(nazwaFolderu, imie, nazwisko, null, null, null); 
+    				  Rejestrowanie rej = new Rejestrowanie();
+    				  rej. main(splitStr);
     				  }
     			  
 
-    		  } 
+    		   
     		}
 			
 		 
@@ -962,7 +948,7 @@ import java.util.List;
     	public void UruchomKlase(String str)
     	{   
     		//String temp = str;
-    		createDirectoryIfNeeded(str); 
+    		loadDataAndRunApp(str); 
     	}
     
     	private void wysrodkujOkno(JFrame frame) {

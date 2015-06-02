@@ -212,7 +212,7 @@ public class ZarzadzanieKlasami implements ActionListener {
 		ss.setBounds(0, 1, 224, 520);
 		ss.setBackground(Color.white);
 		
-		JLabel lblAkcja = new JLabel("Akcja");
+		JLabel lblAkcja = new JLabel("Zarz¹dzaj");
 		lblAkcja.setBounds(10, 0, 120, 30);
 		lblAkcja.setBackground(Color.red);
 		pLewy.add(lblAkcja);

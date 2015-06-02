@@ -215,7 +215,7 @@ import java.util.List;
                 public void mouseClicked(MouseEvent evt)
                 {
                 	GuiMain gm = new GuiMain();
-                	gm.createDirectoryIfNeeded(persona);
+                	gm.loadDataAndRunApp(persona);
                 	System.out.println("Powrót do g³ównego okna. "); 
                 }
             });
@@ -520,7 +520,7 @@ import java.util.List;
     		            {
     		           		 
             	             GuiMain gm = new GuiMain();
-            	             gm.createDirectoryIfNeeded(folderName);
+            	             gm.loadDataAndRunApp(folderName);
     		            }
     		});
         	frame.add(btnPowrot, BorderLayout.SOUTH);

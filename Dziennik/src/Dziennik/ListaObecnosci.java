@@ -177,7 +177,7 @@ public class ListaObecnosci
             public void mouseClicked(MouseEvent evt)
             {
             	GuiMain gm = new GuiMain();
-            	gm.createDirectoryIfNeeded(fullname);
+            	gm.loadDataAndRunApp(fullname);
             	System.out.println("Powrót do g³ównego okna. "); 
             }
         });
@@ -307,7 +307,7 @@ public class ListaObecnosci
 	    table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(comboBox));
 	
 	    DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-	    centerRenderer.setHorizontalAlignment( JLabel.CENTER );
+	    centerRenderer.setHorizontalAlignment( JLabel.LEFT );
 	    table.getColumnModel().getColumn(3).setCellRenderer( centerRenderer ); 
 	    table.getColumnModel().getColumn(2).setCellRenderer( centerRenderer ); 
 	    table.getColumnModel().getColumn(1).setCellRenderer( centerRenderer ); 

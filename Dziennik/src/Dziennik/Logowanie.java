@@ -21,6 +21,7 @@ import javax.swing.*;
 
 import java.awt.SystemColor;
 import java.awt.Font;
+import java.io.File;
 
 public class Logowanie {	
 	
@@ -31,7 +32,7 @@ public class Logowanie {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Logowanie window = new Logowanie();
+					Logowanie window = new Logowanie("","");
 					window.frame.setVisible(true);
 					
 				} catch (Exception e) {
@@ -41,9 +42,10 @@ public class Logowanie {
 		});
 	}
 	
-	public void runGuiMain(String str) {
+	public void uruchomGlowneOknoAplikacji(String iN) {
+		String imieInazwisko = iN;
 	    GuiMain gm = new GuiMain();
-	    gm.UruchomKlase(str);		    
+	    gm.UruchomKlase(imieInazwisko);		    
 	}
 	 
 	Connection connection = null;
@@ -51,20 +53,22 @@ public class Logowanie {
 	private JFrame frame;
 	public JButton bZaloguj;
 	public JTextField txtUserName, txtPassword;
-	
-	/**
-	 * Create the application.
-	 */
-	public Logowanie() {
-		initialize();
+	String katalogDomowy ;
+	String imieUsera, nazwiskoUsera;
+	public String[] args = {};
+ 
+	public Logowanie(String imieUzytkownika, String nazwiskoUzytkownika) {
+		initialize(imieUzytkownika, nazwiskoUzytkownika);
 		//nazwa KLASY.nazwaMETODY z sqlConnection.java
 		connection = sqlConnection.dbConnector();
 	}
 
 	/**
 	 * Initialize the contents of the frame.
+	 * @param nazwiskoUzytkownika 
+	 * @param imieUzytkownika 
 	 */
-	private void initialize() {
+	public void initialize(String imieUzytkownika, String nazwiskoUzytkownika) {
 		frame = new JFrame("E-Dziennik - LOGIN");
 		frame.setBounds(150, 300, 450, 300);
 		frame.setSize(450,400);
@@ -85,15 +89,16 @@ public class Logowanie {
 		userLabel.setBounds(500, 500, 100, 100);
 		panel.add(userLabel);
  
-		JTextField userText = new JTextField(20);
-		userText.setBounds(134, 185, 187, 31);
-		panel.add(userText);
+		JTextField loginNick = new JTextField(20);
+		loginNick.setBounds(134, 185, 187, 31);
+		panel.add(loginNick);
 
 		JLabel passwordLabel = new JLabel("Haslo");
+		passwordLabel.setFocusable(true);
 		passwordLabel.setBounds(92, 235, 62, 14);
 		panel.add(passwordLabel);
 
-		JPasswordField passwordText = new JPasswordField(20);
+		JTextField passwordText = new JPasswordField(20);
 		passwordText.setBounds(134, 227, 187, 31);
 		panel.add(passwordText);
 
@@ -104,7 +109,7 @@ public class Logowanie {
 		panel.add(loginButton);
 		//Sluchacz zdarzen przycisku "Zaloguj".
 		String temp = "";
-		userText.setText("Michal Klich");
+		//userText.setText(imieUzytkownika + " " + nazwiskoUzytkownika);
 		loginButton.addActionListener(new ActionListener() 
 		{
 			
@@ -112,7 +117,7 @@ public class Logowanie {
 			
 			public void actionPerformed(ActionEvent e) {
 			 
-					String personalia = userText.getText(); // get string from jtextfield
+					String imieInazwisko = loginNick.getText(); // get string from jtextfield
 					
 						try
 					{
@@ -126,7 +131,7 @@ public class Logowanie {
 				 
 							
 					//dwa argumenty: parametrIndex to jest indeks zapytania, w tym wypadku username ma indeks 0 a password indeks rowny 1
-					pst.setString(1, userText.getText());
+					pst.setString(1, loginNick.getText());
 					pst.setString(2, passwordText.getText());
 					
 					
@@ -142,44 +147,71 @@ public class Logowanie {
 						count += 1; 
 					}
 					
-					if(count == 1) 
-						{
-							
+					//
+					
+
+					 
+					
+					if((count == 1)) 
+						{ 
 						JOptionPane.showMessageDialog(null, "Zalogowano pomyœlnie");	 
 						frame.setVisible(false);
-						runGuiMain(personalia);
+						uruchomGlowneOknoAplikacji(imieInazwisko);
 						}
-					else if(count > 1) JOptionPane.showMessageDialog(null, "Error: Database structure.");
-					else JOptionPane.showMessageDialog(null, "Podany login lub has³o s¹ nieprawid³owe.");
+					else if(count > 1) JOptionPane.showMessageDialog(null, "Blad struktury bazy danych!");
+					else 
+					{
+						File[] paths; 
+						paths = File.listRoots();
+						for(File path:paths)
+						{ 
+						    katalogDomowy = path.toString();
+						    break;
+						} 
+						if (katalogDomowy.length() > 0 && katalogDomowy.charAt(katalogDomowy.length()-1)==((char) 92)) {
+							katalogDomowy = katalogDomowy.substring(0, katalogDomowy.length()-1);
+						    }
+						
+						String[] splitStr = imieInazwisko.split("\\s+");
+			    		imieUsera = splitStr[0];
+			    		nazwiskoUsera = splitStr[1]; 
+						File fNazwaFolderuUzytkownika = new File(katalogDomowy + "//DziennikElektroniczny//users//" + imieUsera + " " + nazwiskoUsera );
+						System.out.println( imieUsera);
+						System.out.println("Imie to: " + imieUsera + ". Nazwisko to: " + nazwiskoUsera);
+						if(( fNazwaFolderuUzytkownika.exists()))
+						{ 
+						JOptionPane.showMessageDialog(null, "Zalogowano pomyœlnie");	 
+						frame.setVisible(false);
+						uruchomGlowneOknoAplikacji(imieInazwisko);
+						System.out.println("persona " + imieInazwisko);
+						}
+						else JOptionPane.showMessageDialog(null, "Logowanie nie powiod³o siê.");	
+					}
 				}
 				
 				//zamkniecie polaczenia
 				  
 				catch(Exception ex)
 				{
-					JOptionPane.showMessageDialog(null, ("Blad nr.X: " + ex));
+					JOptionPane.showMessageDialog(null, ("Info log.: " + ex));
+			 
 				}
-				finally{
-					//zamkniecie polaczenia z baza "connec
-					try{
-						
-					}catch(Exception ex)
-					{ 
-						
-					}
-				}
+			
+				
 			}
 			
 		});
 		
-		JButton btnRegister = new JButton("Zarejestruj sie");
+		JButton btnRegister = new JButton("Nie masz konta? Zarejestruj sie");
 		btnRegister.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) 
 			{ 
-				
+				//Rejestrowanie rej = new Rejestrowanie();
+				Rejestrowanie.main(args);
+				frame.dispose();
 			}
 		});
-		btnRegister.setBounds(134, 338, 187, 23);
+		btnRegister.setBounds(70, 338, 270, 23);
 		btnRegister.setEnabled(true);
 		loginButton.setBackground(new Color(102, 102, 255));
 		btnRegister.setBackground(Color.WHITE);
@@ -201,7 +233,7 @@ public class Logowanie {
 		label.setBounds(193, 103, 71, 73);
 		panel.add(label);
 		
-		JLabel lblZalogujSiBy = new JLabel("Zaloguj si\u0119 by korzysta\u0107 z dzeinnika.");
+		JLabel lblZalogujSiBy = new JLabel("WprowadŸ imie i nazwisko oraz has³o.");
 		lblZalogujSiBy.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		lblZalogujSiBy.setBounds(94, 59, 283, 23);
 		panel.add(lblZalogujSiBy);
@@ -212,10 +244,9 @@ public class Logowanie {
 		panel.add(editorPane); 
 	}
 
-	public static void runClassLogowanie() 
-	{
-		
-		Logowanie w = new Logowanie();
+	public static void runClassLogowanie(String imieUzytkownika, String nazwiskoUzytkownika) 
+	{ 
+		Logowanie w = new Logowanie(imieUzytkownika, nazwiskoUzytkownika );
 		w.frame.setVisible(true); 
 	}
 }

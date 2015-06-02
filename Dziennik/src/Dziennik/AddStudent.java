@@ -63,7 +63,6 @@ public class AddStudent {
 		});
 		txtNazwisko.setBounds(160, 5, 260, 20);
 		p.add(txtNazwisko);
-		
 		bAdd = new JButton("Dodaj"); 
 		bAdd.setBounds(450, 5, 260, 20);
 		bAdd.setBackground(new Color(0, 204, 102));
@@ -121,7 +120,7 @@ public class AddStudent {
 							 }
 				 f.dispose();	
 				 GuiMain guimain = new GuiMain();
-				 guimain.createDirectoryIfNeeded(fullname);
+				 guimain.loadDataAndRunApp(fullname);
 				 }
 			}
 		});
