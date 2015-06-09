@@ -34,7 +34,7 @@ public class ListaUczniow extends AbstractTableModel
 		String line;
 		data = new Vector();
 		columns = new Vector();
-		File file = new File("c:\\dziennik\\users\\" + fullname + "\\studenci.txt"); 
+		File file = new File("c:\\DziennikElektroniczny\\users\\" + fullname + "\\studenci.txt"); 
 		try {
 				FileInputStream fis = new FileInputStream(file);
 				BufferedReader br = new BufferedReader(new InputStreamReader(fis));

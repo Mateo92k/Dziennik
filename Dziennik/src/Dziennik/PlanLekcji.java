@@ -71,6 +71,7 @@ import javax.swing.plaf.ColorUIResource;
 import org.omg.CORBA.Bounds;
  
 
+
 import com.mysql.jdbc.StringUtils;
 
 import java.util.List;
@@ -92,6 +93,9 @@ import java.util.List;
 		String[] planZajec3Bsr = {"Matematyka", "Marketing", "WF", "Geografia", "Niemiecki"};
 		String[] planZajec3Bcz = {"Marketing", "Matematyka", " Fizyka", "Geografia", "Francuski"};
 		String[] planZajec3Bpt = {"Rosyjski", "Marketing", "Angielski", "Geografia", "Niemiecki"};
+		String dzien,  godzina,  nowaWartosc;
+		int[] mozliwosci  ; 
+		String[] dniTygodnia = {"Poniedzialek", "Wtorek", "Sroda", "Czwartek", "Piatek"};
 		
     	public JMenuBar createJMenuBar()  
     	{
@@ -214,9 +218,10 @@ import java.util.List;
             {
                 public void mouseClicked(MouseEvent evt)
                 {
+                	frame.dispose();
                 	GuiMain gm = new GuiMain();
                 	gm.loadDataAndRunApp(persona);
-                	System.out.println("Powrót do g³ównego okna. "); 
+                	System.out.println("Powrót do g³ównego okna."); 
                 }
             });
     		
@@ -300,7 +305,6 @@ import java.util.List;
    	  		panelDni.setLayout(null);  
    	  		panelDni.setBackground(new Color(242,242,242));	
    	  		
-   	  		String[] dniTygodnia = {"Poniedzialek", "Wtorek", "Sroda", "Czwartek", "Piatek"};
    	  		JLabel[] lblDniTygodnia = new JLabel[dniTygodnia.length];
    	  		
    	  		int  wys = 0;
@@ -420,7 +424,7 @@ import java.util.List;
    	  		lblWprowadzZmiany.setBounds(900, 110, 500, 30);
    	  		lblWprowadzZmiany.setFont(new Font("default", Font.BOLD, 16));
    	  		
-   	  			JLabel lblgodzina = new JLabel("Godzina:");
+   	  		JLabel lblgodzina = new JLabel("Godzina:");
    	  		lblgodzina.setBounds(870, 140, 500, 30);
    	  		lblgodzina.setFont(new Font("default", Font.BOLD, 16));
    	  		lblgodzina.setVisible(false);
@@ -435,6 +439,28 @@ import java.util.List;
    	  		lblAktualny.setFont(new Font("default", Font.BOLD, 16));
    	  		lblAktualny.setVisible(false);
    	  		
+   	  		JPanel pEdycji = new JPanel(); 
+     	  	GridLayout layoutEdycja = new GridLayout(3,1);
+     	  	
+   	  		JLabel wybierzDzien = new JLabel("Wybierz dzieñ: ");
+   	  		JLabel wybierzGodzine = new JLabel("Wybierz godzine: ");
+   	  		JLabel nowaWartosc = new JLabel("Nowy przedmiot: ");
+   	  		
+   	  		JTextField btnWybierzDzien = new JTextField();
+   	  		JTextField btnWybierzGodzine = new JTextField();
+   	  		JTextField btnNowaWartosc = new JTextField();
+   	  		
+   	  		JButton bWprowadzZmiany = new JButton("Wprowadz zmiany");
+   	  		
+   	  		int[] zakresDni = {};
+   	  		//wypelnienie 'mozliwosci' liczbami z zakresu liczby dni
+//   	  		for(int i = 0; i < dniTygodnia.length; i++)
+//   	  		{ 
+//				System.out.println(i+1);
+//				zakresDni[i] = i+1;
+//				
+//   	  		}
+   	  		
    	  		frame.add(comboGodziny);
    	  		JComboBox comboDzien = new JComboBox(dniTygodnia);
    	  		comboDzien.setBounds(955, 110, 400, 30);
@@ -442,23 +468,48 @@ import java.util.List;
         	{
         	    public void actionPerformed(ActionEvent e) {
         	    	{
-        	    		   
-        	               if(comboDzien.getSelectedIndex() == 0 )
-        	               {
-        	               			 comboGodziny.setVisible(true);
-   	  								   
-   	  									lblgodzina.setVisible(true); 
-            	              			lblAktualny.setBounds(950, 170, 500, 30);
-            	              		 lblAktualny.setVisible(true);
-         	         			   
-        	               }
-        	          	   if(comboDzien.getSelectedIndex() == 1 )	
-        	          	   {
-        	          	 			comboGodziny.setVisible(true);
-   	  								lblgodzina.setVisible(true); 
-            	              		lblAktualny.setBounds(950, 170, 500, 30);
-            	              		lblAktualny.setVisible(true);
-        	          	   }                 
+//        	    		String oKlasie = "3x";
+//        	    		System.out.println();
+//        	    		//DodajZmiany
+//        	    		zmienPlan(dzien, godzina, nowaWartosc, dniTygodnia, godzinyZajec, oKlasie);
+        	    		//stworz dni tygodnia wypelnione numerami
+        	    		
+        	    		
+        	    	
+//        	    		//wyswietl je
+//        	    		for(int i = 0; i< mozliwosci.length; i++)
+//        	    		{
+//        	    			System.out.println(mozliwosci[i]);
+//        	    		}
+        	    		
+//        	    		int zmiennaOPeracyjnaDzien = 0;
+//        	    		
+//        	    		for(int y = 0; y < mozliwosci.length; y++)
+//        	    		{
+//        	    			if(comboDzien.getSelectedIndex() == mozliwosci[y]);
+//        	    			zmiennaOPeracyjnaDzien = mozliwosci[y]; 
+//        	    			break; 
+//        	    		}
+//
+//    	    			System.out.println("Operujesz zmienna : " +  zmiennaOPeracyjnaDzien);
+//        	    		 if()
+//        	    		   
+//        	               if(comboDzien.getSelectedIndex() == 0 )
+//        	               {
+//        	               			 comboGodziny.setVisible(true);
+//   	  								   
+//   	  									lblgodzina.setVisible(true); 
+//            	              			lblAktualny.setBounds(950, 170, 500, 30);
+//            	              		 lblAktualny.setVisible(true);
+//         	         			   
+//        	               }
+//        	          	   if(comboDzien.getSelectedIndex() == 1 )	
+//        	          	   {
+//        	          	 			comboGodziny.setVisible(true);
+//   	  							lblgodzina.setVisible(true); 
+//            	              		lblAktualny.setBounds(950, 170, 500, 30);
+//            	              		lblAktualny.setVisible(true);
+//        	          	   }                 
         	    	}
         	    }
         	});
@@ -523,19 +574,16 @@ import java.util.List;
             	             gm.loadDataAndRunApp(folderName);
     		            }
     		});
-        	frame.add(btnPowrot, BorderLayout.SOUTH);
-        	
+        	frame.add(btnPowrot, BorderLayout.SOUTH); 
       		frame.add(txtNowy);
-        	frame.add(btnZapiszZmiany);
-        	
+        	frame.add(btnZapiszZmiany); 
    	  		frame.add(lblAktualny);
    	  		frame.add(lblgodzina);
    	  		frame.add(comboDzien);
    	  		frame.add(lblWprowadzZmiany);
    	  		frame.add(panelZarzadzaj);
     		frame.add(p1, BorderLayout.NORTH);
-    		frame.add(panelDni);
-    
+    		frame.add(panelDni); 
     		frame.setVisible(true);
     	 
  	
@@ -548,6 +596,11 @@ import java.util.List;
 //			}
     	} // ---koniec: private void create GUI(String str) 
         
+    	public void zmienPlan(String dzien, String godzina, String nowaWartosc2, String[] dniTygodnia, String[] godzinyZajec, String nazwaZmienianejKlasy)
+    	{
+    		
+    	}
+    	
 		// main 
     	public static final void main(String[] args) throws InterruptedException 
     	{ 

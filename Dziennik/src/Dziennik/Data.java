@@ -25,9 +25,9 @@ public class Data {
 		{
 		public void run()
 			{
-			 LoadData loadData = new LoadData();
-			 loadData.takeData(null, null, null, args, args, args);
-			 setLogedUser("jakis user");
+//			 LoadData loadData = new LoadData();
+//			 loadData.takeData(null, null, null, args, args, args);
+//			 setLogedUser("jakis user");
 			}
 		
 	 

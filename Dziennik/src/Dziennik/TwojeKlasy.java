@@ -71,6 +71,10 @@ import javax.swing.plaf.ColorUIResource;
 import org.omg.CORBA.Bounds;
  
 
+
+
+
+
 import com.mysql.jdbc.StringUtils;
 
 import java.util.List;
@@ -84,7 +88,7 @@ import java.util.List;
     	String strDay = new SimpleDateFormat("dd-MM-yyyy").format(Calendar.getInstance().getTime());
   
     	final String zalogowanoJako = "Zalogowano jako: ";
-		public String imie, nazwisko, wychowankowie, nazwaFolderuUzytkownika, persona;
+		public String imie, nazwisko, wychowankowie, strSciezkaDoKataloguDomowegoUzytkownika, imieInazwisko;
 		public String[] uczeKlasy, wszystkieKlasy;
 		public String[] args = {};
       
@@ -133,26 +137,26 @@ import java.util.List;
     		return mainMenuBar;
     	}
    
-    	private void createGui(String folderName, String firstName, String lastName, String[] listOfAllClass, String[] listClassIteach, String KlasaWychowankowie) 
+    	//sciezkaFolderuUzytkownika,  i,  n,  listOfAllClass, listClassIteach,  KlasaWychowankowie
+    	public void createGui(String sciezkaFolderuUzytkownika, String i,  String n,  String[] listOfAllClass, String[] listClassIteach,  String KlasaWychowankowie) 
     	{
-//			tworzenie podkreslenia
+//			Metoda: tworz¹ca podkreœlenie
 //    		Font font = nazwaKonkretnegoObiektu.getFont();
 //    		Map attributes = font.getAttributes();
 //    		attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
 //    		bWyloguj.setFont(font.deriveFont(attributes));
-    		
     	
-    		
-    		nazwaFolderuUzytkownika = folderName;
-    		imie = firstName; 
-    		nazwisko = lastName;
+    		imie = i; 
+    		nazwisko = n;
     		wszystkieKlasy = listOfAllClass;
     		uczeKlasy = listClassIteach;
     		wychowankowie = KlasaWychowankowie;
-    		persona = imie + " " + nazwisko; 
-    		
-    		System.out.println("folder name: " + folderName);
-    		
+    		imieInazwisko = imie + " " + nazwisko; 
+    	
+    		String[] wszystkieKlasy =  listOfAllClass;
+    		String[] uczyKlasy = listClassIteach;
+    		String wychowankowie = KlasaWychowankowie;
+    		 
     		//frame settings..
     		JFrame frame = new JFrame("Dziennik Elektroniczny - Twoje klasy");
     		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -211,14 +215,17 @@ import java.util.List;
             {
                 public void mouseClicked(MouseEvent evt)
                 {
-                	System.out.println("Powrót do g³ównego okna. "); 
+                	frame.dispose();
+                	GuiMain gm = new GuiMain();
+                	gm.loadDataAndRunApp(imieInazwisko);
+                	System.out.println("Powrót do g³ównego okna."); 
                 }
             });
     		
     		JLabel lblMojeKlasy = new JLabel("Moje Klasy"); 
     		lblMojeKlasy.setCursor(new Cursor(Cursor.HAND_CURSOR)); 
     		
-    		JLabel lblDaneZalogowanego = new JLabel(persona);
+    		JLabel lblDaneZalogowanego = new JLabel(imieInazwisko);
     		lblDaneZalogowanego.setIcon(new ImageIcon(Wyszukiwanie.class.getResource("/res/usericonm.png")));
       
     		JLabel lblMojProfil = new JLabel("Mój profil");
@@ -236,12 +243,10 @@ import java.util.List;
     			@Override
     			public void actionPerformed(ActionEvent e) {
     				frame.dispose();
-    				JOptionPane.showMessageDialog(null, "Wylogowano.");
-    				Logowanie.runClassLogowanie();
+    				 
     			}
     		});
-    		 
- 
+    		  
     		//Dodanie komponentów do panelu1
     		p1.add(lblLogo); // dodanie logo z funkcj¹ maj¹ce funkcje powrotu do glownego okna kontekstowego
     		p1.add(Box.createHorizontalGlue());	// tworzenie  obiektów w orientacji od prawej do lewej
@@ -274,7 +279,7 @@ import java.util.List;
     		p2.setLayout(new BoxLayout(p2, BoxLayout.X_AXIS));  
     		p2.setBackground(new Color(239,239,239));
 		 
-    		JLabel lblInformacje = new JLabel("Informacje ");
+    		JLabel lblInformacje = new JLabel("Informacje: Wymagana jest informacja o przedmiotach szkolnych. W tym celu kliknij 'Dodaj przedmiot' a nastêpnie przypisz do wybranej klasy.  ");
     		//lblTwojeKlasy.setIcon(new ImageIcon(Wyszukiwanie.class.getResource("/res/klasIcon.png")));
     		lblInformacje.setFont(new Font("default", Font.BOLD, 20));
     		p2.add(lblInformacje);
@@ -331,11 +336,20 @@ import java.util.List;
             {
                 public void mouseClicked(MouseEvent evt)
                 {
-                 
-                	 
+                  
                 	AddSubject addsubject = new AddSubject();
-                	addsubject.initialize(persona, uczeKlasy, listClassIteach);
-                
+                	
+                	//format przeciazenia funkcji:
+ //String strSciezkaDomowa, String imieUzytkownika, String nazwiskoUzytkownika, String[] wszystkieKlasy, String[] uczyKlasy, String wychowankowie
+                	//addsubject.initialize(sciezkaFolderuUzytkownika,  i,  n,  listOfAllClass, listClassIteach,  KlasaWychowankowie);
+                	addsubject.initialize(sciezkaFolderuUzytkownika, i, n, listClassIteach);
+                	System.out.println("Sprawdz poprawnoœæ: sciezkaFolderuUzytkownika: " + sciezkaFolderuUzytkownika);
+                	System.out.println("Sprawdz poprawnoœæ: i: " + i);
+                	System.out.println("Sprawdz poprawnoœæ: n: " + n);
+                	for (int i = 0 ; i<listClassIteach.length ; i++)
+                	System.out.println("Sprawdz poprawnoœæ: listClassIteach: " + listClassIteach[i]);
+                	
+                 
                 }
             });
      		if (uczeKlasy == null) lblDodajPrzedmiot.setEnabled(false);
@@ -381,15 +395,17 @@ import java.util.List;
      		lblDodajKlase.setFont(new Font("default", Font.ITALIC, 16));
      		lblDodajKlase.setIcon(new ImageIcon(Wyszukiwanie.class.getResource("/res/addNew.png")));
      		lblDodajKlase.addMouseListener(new MouseAdapter()
-            {
-                public void mouseClicked(MouseEvent evt)
-                {
-                	System.out.println("source: TwojeKlasy.java; wartosc zmiennej 'persona' to '"+persona+"'."); 
+            { 
+				public void mouseClicked(MouseEvent evt)
+                {  
+                	frame.dispose();
+                	AddNewClass adc = new AddNewClass();
+                	adc.initialize(imieInazwisko,  sciezkaFolderuUzytkownika,  i,  n,  listOfAllClass, listClassIteach,  KlasaWychowankowie);
                 	//frame.disable();
                 	//AddNewClass.main(args);
-                	AddNewClass adc = new AddNewClass();
-                	adc.initialize(persona);
- 
+                	//to do: ogarn¹c argumenty tego ponizej
+                	//AddNewClass adc = new AddNewClass(i, n);
+                	//adc.initialize(imieInazwisko); 
                 }
             });
      		lblDodajKlase.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -425,7 +441,7 @@ import java.util.List;
       				
       				buttons[s] = new JButton();
       				buttons[s].setBounds(x+100,y+13,24,24);
-      				buttons[s].setIcon(new ImageIcon(Wyszukiwanie.class.getResource("/res/detele.png"))); 
+      				//buttons[s].setIcon(new ImageIcon(Wyszukiwanie.class.getResource("/res/detele.png"))); 
       				buttons[s].setOpaque(false);
       				buttons[s].setBorder(null);
       				buttons[s].setContentAreaFilled(false);
@@ -547,14 +563,9 @@ import java.util.List;
 //    		return arr;
 //    	}
     	
-    		public void wczytajDane(String folderName, String firstName, String lastName, String[] listOfAllClass, String[] listClassIteach, String KlasaWychowankowie)
-    		{  
-    			//sprawdzenie czy nauczyciel posiada klasy(aby odpowiednio zaladowac ewentualne klasy do programu jesli sa w pliku jakies)
-//    			if(czyNauczycielMaJakiesKlasy(listClassIteach))
-//    			{
-//    				
-//    			}
-    			createGui(folderName, firstName, lastName, listOfAllClass, listClassIteach, KlasaWychowankowie);
+    		public void wczytajDane(String imieInazwisko, String firstName, String lastName, String[] listOfAllClass, String[] listClassIteach, String KlasaWychowankowie, String sciezkaKataloguUzytkownika)
+    		{   
+    			createGui(  imieInazwisko,  firstName, lastName, listOfAllClass, listClassIteach,  KlasaWychowankowie);
     			for (String element : listClassIteach)
     			      System.out.printf("%s ", element);
     		}
@@ -563,7 +574,7 @@ import java.util.List;
 			 
     		public void uruchomKlase(String fullName)
     		{
-    			File fKlasy = new File("C:/dziennik/users/" + fullName+ "/uczyKlasy.txt.txt");  
+    			File fKlasy = new File("C:/dziennik/users/" + fullName + "/uczyKlasy.txt.txt");  
     			//kod odpowiedzialny za pobranie klas tego nauczyciela i uruchoemienie tej klasy z parametrami:
     			if(fKlasy.length()!=0)
   				  try {

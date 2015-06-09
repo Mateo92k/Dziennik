@@ -38,7 +38,7 @@ public class AddNewClass {
 	private JTextField rocznikDo;
 	private JTextField iloscUczniow;
 	public String[] args = {};
-
+	tworzenieKatalogow tworzeniekatalogow = new tworzenieKatalogow();
 	/**
 	 * Launch the application.
 	 */
@@ -46,11 +46,15 @@ public class AddNewClass {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					
+					//tworzenieKatalogow.stworzFolder("c://klasyInfo//przedmiot");
+					 
 					//AddNewClass window = new AddNewClass();
 					//window.frame.setVisible(true);
 					//window.initialize("Michal Klich");
 					//window.initialize(folderName, firstName, lastName, listOfAllClass, listClassIteach, KlasaWychowankowie);
 				} catch (Exception e) {
+				
 					e.printStackTrace();
 				}
 			}
@@ -60,22 +64,29 @@ public class AddNewClass {
 	/**
 	 * Create the application.
 	 */
-	public AddNewClass() {
-		initialize("Michal Klich");
-	}
+//	public AddNewClass(String imie, String nazwisko) {
+//		String imieInazwisko = imie + " " + nazwisko;
+//		initialize(imieInazwisko );
+//	}
 
 	/**
 	 * Initialize the contents of the frame.
+	 * @param n2 
+	 * @param nazwiskoUzytkownika 
 	 */
-	public  void initialize(String fullName) {
+	public  void initialize(String imieInazwisko, String im,  String na,  String sciezkaFolderu, String[] listOfAllClass, String[] listClassIteach,  String KlasaWychowankowie) {
+		String sciezkaFolderuUzytkownika = sciezkaFolderu;
+		String i = im;
+		String n = na;
+		
 		frame = new JFrame();
-		frame.getContentPane().setBackground(UIManager.getColor("info"));
+		frame.setBackground(UIManager.getColor("info"));
 		frame.setBounds(100, 100, 454, 376);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(null);
+		frame.setLayout(null);
 		panel.setBackground(Color.WHITE);
 		panel.setBounds(0, 11, 438, 38);
-		frame.getContentPane().add(panel);
+		frame.add(panel);
 		panel.setLayout(null);
 		frame.setVisible(true);
 		
@@ -87,7 +98,7 @@ public class AddNewClass {
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBounds(0, 49, 438, 300);
-		frame.getContentPane().add(panel_1);
+		frame.add(panel_1);
 		panel_1.setLayout(null);
 		
 		JSeparator separator = new JSeparator();
@@ -150,10 +161,64 @@ public class AddNewClass {
 		JButton btnZapisz = new JButton("Zapisz");
 		btnZapisz.setBackground(new Color(0, 204, 102));
 		btnZapisz.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String nameOfClass = nazwaKlasy.getText();
+			public void actionPerformed(ActionEvent e)
+			{ 
+				String nazwaFolderuNowejKlasy = nazwaKlasy.getText();
+				//tworzy folder w klasyInfo dla nowo wprowadzonej klasy.
+				
+				File f = new File("c://DziennikElektroniczny//users//" + imieInazwisko + "//klasyInfo//" + nazwaKlasy.getText()); 
+				File f2 = new File("c://DziennikElektroniczny//users//" + imieInazwisko + "//klasyInfo//" + nazwaKlasy.getText() + "//przedmioty.txt");
+				File f3 = new File("c://DziennikElektroniczny//users//" + imieInazwisko + "//klasyInfo//" + nazwaKlasy.getText() + "//studenci.txt");
+				File f4 = new File("c://DziennikElektroniczny//users//" + imieInazwisko + "//uczyKlasy.txt.txt"); 
 		 
-				File fDodajTuNowaKlase = new File("C:/dziennik/users/Michal Klich/uczyKlasy.txt.txt"); 
+				String strOceny1 ="C://DziennikElektroniczny/users//" + imieInazwisko + "//klasyInfo//" + nazwaKlasy.getText() + "//oceny.txt";  
+				 File fOceny1 = new File(strOceny1);
+				 if(!fOceny1.exists() && !fOceny1.isDirectory())
+				 {
+					  System.out.println("Brak pliku fOceny.txt");
+						if (!fOceny1.exists()) 
+						  { 
+							try { 
+							      if (fOceny1.createNewFile()){
+							        System.out.println("File fPrzedmioty created!");
+							      }else{
+							        System.out.println("File already exists.");
+							      	}
+						    		} catch (IOException e1) {
+							      e1.printStackTrace();
+						    		}
+							  System.out.println("InfoLog nr2 " + fOceny1); 
+						  }
+				 }
+				
+				
+				try {
+					f.mkdirs();
+					f2.createNewFile();
+					f3.createNewFile();
+					
+					try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f4, true))))
+					{
+					    out.println(nazwaFolderuNowejKlasy);   
+						JOptionPane.showMessageDialog(null, "Klasa dodana pomyœlnie. Zmiany bêd¹ widoczne po ponownym uruchomieniu programu."); 
+					} 
+					
+					  frame.setVisible(false); 
+				      frame.dispose();
+					  zamknijOknoUruchomTwojeKlasy(sciezkaFolderuUzytkownika ,imieInazwisko,    i,     n,    listOfAllClass,   listClassIteach,    KlasaWychowankowie);
+					
+				} catch (IOException e1) { 
+					e1.printStackTrace();
+					frame.dispose();
+				}
+				
+				frame.setVisible(false); 
+				frame.dispose();
+ 
+	 
+				
+				/**
+				File fDodajTuNowaKlase = new File("C:/DziennikElektroniczny/users/" + imieInazwisko + "/uczyKlasy.txt.txt"); 
 				if(fDodajTuNowaKlase.exists() && !fDodajTuNowaKlase.isDirectory() && radiobtnWychowawca.isSelected())
 				{
 					System.out.println(" ok folder istnieje");
@@ -172,9 +237,9 @@ public class AddNewClass {
 						 System.out.println("Nie udalo sie dodac nowej linijki do pliku(brak odpowiednich plikow)");
 					}
 				//stworz folder gdzie beda info o klasach 
-				File fKlasyInfo = new File("C:/dziennik/users/Michal Klich/klasyInfo");  
+				File fKlasyInfo = new File("C:/DziennikElektroniczny/users/" + imieInazwisko + "/klasyInfo");  
 				//stworz folder w ktorym bedzie konkretna klasa z plikiem txt
-				File fNewClassInfo = new File("C:/dziennik/users/Michal Klich/klasyInfo/"+nazwaKlasy.getText()+".txt.txt"); 
+				File fNewClassInfo = new File("C:/DziennikElektroniczny/users/" + imieInazwisko + "/klasyInfo/"+nazwaKlasy.getText()+".txt.txt"); 
 				//jesli pole z nazwa klasy nie jest puste 
 				if(nazwaKlasy.getText()!=null)
 				{
@@ -208,7 +273,7 @@ public class AddNewClass {
 				}
 				//dokonczyc tworzenie w przypadku gdy folder istnieje i tylko dopisuje kolejne nowe pliki txt
 				TwojeKlasy tk = new TwojeKlasy();
-				tk.uruchomKlase(fullName);
+				tk.uruchomKlase(imieInazwisko);
 				frame.dispose();
 				}
 			
@@ -216,7 +281,7 @@ public class AddNewClass {
 					System.out.println("Nastapil blad przy dodaniu nowej klasy.");
 					}
 				frame.setVisible(false); 
-
+				*/
 				
 			}
 			
@@ -225,10 +290,12 @@ public class AddNewClass {
 		btnZapisz.setForeground(SystemColor.textHighlightText);
 		panel_2.add(btnZapisz);
 		
-		JButton btnAnuluj = new JButton("Anuluj");
+		JButton btnAnuluj = new JButton("Zamknij");
 		btnAnuluj.setBackground(Color.white);
 		btnAnuluj.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				frame.setVisible(false);
+				frame.dispose();
 			}
 		});
 		panel_2.add(btnAnuluj);
@@ -237,5 +304,14 @@ public class AddNewClass {
 		btnNewButton.setBackground(SystemColor.activeCaptionBorder);
 		btnNewButton.setBounds(1, 253, 437, 2);
 		panel_1.add(btnNewButton);
+	}
+	
+	
+	void zamknijOknoUruchomTwojeKlasy(String sciezkaFolderuUzytkownika, String imieInazwisko, String i, String n, String[] listOfAllClass, String[] listClassIteach, String klasaWychowankowie)
+	{
+		TwojeKlasy tk = new TwojeKlasy();
+	 
+		tk.createGui( sciezkaFolderuUzytkownika,  i,  n,  listOfAllClass, listClassIteach,  klasaWychowankowie);
+	
 	}
 }

@@ -179,7 +179,10 @@ public class Oceny {
         {
             public void mouseClicked(MouseEvent evt)
             {
-            	System.out.println("Powrót do g³ównego okna");
+            	frame.dispose();
+            	GuiMain gm = new GuiMain();
+            	gm.loadDataAndRunApp(persona);
+            	System.out.println("Powrót do g³ównego okna."); 
             }
         });
 

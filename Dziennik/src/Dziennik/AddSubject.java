@@ -18,6 +18,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
@@ -36,7 +37,8 @@ public class AddSubject {
 	private JLabel lblPrzypiszDoKlasy;
 	private JButton btnDodaj;
 	private JButton btnAnuluj;
-	 
+	String strSciezkaDoKataloguDomowegoUzytkownika, imie, nazwisko, wychowankowie;
+	String[] wszystkieKlasy,uczeKlasy;
 	 
 	/**
 	 * Launch the application.
@@ -46,7 +48,7 @@ public class AddSubject {
 			public void run() {
 				try {
 					AddSubject as = new AddSubject();
-					as.initialize(null, tablica);
+					as.initialize(null, null, null, null);
 					
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -62,15 +64,19 @@ public class AddSubject {
 //		initialize(null, null);
 //	}
 
-	public void runit(String[] tablica)
-	{
-		initialize("Michal KLIch", tablica, null);
-	}
+//	public void runit(String[] tablica)
+//	{
+//		initialize(String strSciezkaDomowa, String imieUzytkownika, String nazwiskoUzytkownika, String[] wszystkieKlasy, String[] uczyKlasy, String wychowankowie);
+//	}
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	public void initialize(String persona, String[] tablica, String[] listClassIteach) {
-		System.out.println("Dl" +tablica.length);
+	@SuppressWarnings("rawtypes")
+	public void initialize(String sciezkaFolderuUzytkownika, String i,  String n,String[] listClassIteach) 
+	{
+		System.out.println("imieUzytkownika:" + i);
+		System.out.println("nazwiskoUzytkownika:" + n);
+		
 		frame = new JFrame();
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -92,73 +98,92 @@ public class AddSubject {
 		lblPrzypiszDoKlasy.setBounds(68, 93, 149, 26);
 		frame.getContentPane().add(lblPrzypiszDoKlasy);
 		
-		
+	 
 		
 		btnAnuluj = new JButton("Anuluj");
 		btnAnuluj.setBounds(225, 228, 89, 23);
 		frame.getContentPane().add(btnAnuluj);
 		
+		String[] listClassIteach2 = {"chuj", "kurwa"};
+		
+		@SuppressWarnings("unchecked")
 		JComboBox ComboBox = new JComboBox(listClassIteach );
 		ComboBox.setBounds(225, 93, 122, 26);  
 		frame.getContentPane().add(ComboBox);
 		
 		btnDodaj = new JButton("Dodaj");
 		btnDodaj.setBounds(123, 228, 89, 23);
+		frame.getContentPane().add(btnDodaj);
 		btnDodaj.addActionListener(new ActionListener() 
 		{
 			public void actionPerformed(ActionEvent e) 
 			{
-				if(ComboBox.getSelectedItem()!=null)
-				{	
-					String cbxWybranaKlasa =  ComboBox.getSelectedItem().toString();
-					String nazwaPrzedmiotu = txtPrzedmiot.getText();
-					//jesli katalog z informacjami o klasie nie istnieje,stworz go
-					File fAboutClass = new File("c:\\dziennik\\users\\"+ persona + "\\AboutClass");
-					if(!fAboutClass.exists())
-					{
-						//stworz folder z informacjami o danej klasie
-						fAboutClass.mkdir(); 
-					}
-					//czy istnieje juz ten przedmiot w tej klasie
-					File fKonkretnaKlasa = new File("c:\\dziennik\\users\\"+ persona + "\\AboutClass\\" + cbxWybranaKlasa);
-					if(!fKonkretnaKlasa.exists())
-					{
-						fKonkretnaKlasa.mkdir();
-					}
-					
-					File fPrzedmioty = new File("c:/dziennik/users/"+ persona + "/AboutClass/" + cbxWybranaKlasa + "/Przedmioty/");
-					if(!fPrzedmioty.exists())
-					{
-						fPrzedmioty.mkdir();
-					}
-					
-					File fKonkretnyPrzedmiot = new File("c:/dziennik/users/"+ persona + "/AboutClass/" + cbxWybranaKlasa + "/Przedmioty/" + txtPrzedmiot.getText()+".txt.txt");
-					if(!fKonkretnyPrzedmiot.exists())
-					{
-						PrintWriter writer;
-						try {
-							writer = new PrintWriter(fKonkretnyPrzedmiot, "UTF-8");
-							writer.println(nazwaPrzedmiotu );
-						 
-							writer.close();
-						} catch (FileNotFoundException e1) { 
-							e1.printStackTrace();
-						} catch (UnsupportedEncodingException e1) { 
-							e1.printStackTrace();
-						}
-						
-					}
-					
-					if(fAboutClass.exists() && fKonkretnaKlasa.exists() && fKonkretnyPrzedmiot.exists() && !fKonkretnyPrzedmiot.isDirectory())
-					{
-						//stworz plik z konkretn klas¹ 
-						System.out.println("wokr");
-					}
+				//sprawdzanie poprawnosci przeslanych klas
+//				for (int i = 0 ; i<listClassIteach.length ; i++)
+//                	System.out.println("Sprawdz poprawnoœæ!: listClassIteach: " + listClassIteach[i]);
+//				
+				//todo: ponizej nie dziala 
+  			   System.out.println("nazwa przedmiotu nowego: " + txtPrzedmiot.getText());
+				int indexCombo = ComboBox.getSelectedIndex();   
+  				int k = 0;
+				for (  k = 0; k<listClassIteach.length;k++)
+				{
+					if(indexCombo==k)
+					System.out.println("Dodano do klasy:" + listClassIteach[indexCombo]); 
+					break;
 				}
+				
+				String wybranyDziennik = "PKiSI";
+				String strPrzedmioty ="C://DziennikElektroniczny/users//" + i + " " + n + "//klasyInfo//" + wybranyDziennik + "//przedmioty.txt";  
+			    File fPrzedmioty = new File(strPrzedmioty);
+				PrintWriter os; 
+				
+				try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fPrzedmioty, true))))
+				{ 
+				    	out.println(txtPrzedmiot.getText() ); 
+				    	JOptionPane.showMessageDialog(null, "Pomyœlnie dodano wartoœæ z txtPrzedmiot do przedmioty.txt");  
+				    	frame.dispose();
+				   
+//				    	TwojeKlasy tk = new TwojeKlasy();
+//						tk.createGui( sciezkaFolderuUzytkownika,  i,  n,  listOfAllClass, listClassIteach,  KlasaWychowankowie);
+				} 
+				
+				catch (IOException e1) 
+				{
+					e1.printStackTrace();
+				} 
+			
 			}
 		});
 		
 		
-		frame.getContentPane().add(btnDodaj);
+		
 	}
+	
+ 
+ 
 }
+
+//				String sciezkaDoZapisuPrzedmiotu = sciezkaFolderuUzytkownika + "//klasyInfo//" + listClassIteach[indexCombo] + "przedmioty.txt.txt";
+//				
+// 
+//				 System.out.println("Czy sciezka zawiera nazwe klasy do ktorej chcesz dodac przedmiot?" + listClassIteach[indexCombo]);
+//				 String strPrzypiszKlasie = listClassIteach[indexCombo];
+//			     System.out.println("Czy sciezka przedmioty txt.: + " + sciezkaFolderuUzytkownika);
+//			     String strSciezkaPrzedmioty = sciezkaFolderuUzytkownika + "//klasyInfo//" + strPrzypiszKlasie + "//przedmioty.txt.txt";
+//			     File fPrzedmioty = new File(strSciezkaPrzedmioty);
+//			     
+//			     if(fPrzedmioty.exists())
+//			     {
+//			    	 System.out.println("Wszystko dziala");
+//			     }
+//			     else   System.out.println("B³¹d.");
+				 //String nazwaPrzediotuDoZapisania = txtPrzedmiot.getText();
+//				 //String sciezkaDoTxtPrzedmioty = sciezkaFolderuUzytkownika + "//klasyInfo//" + 
+//				 dodajPrzedmiot(strSciezkaKataloguDomowegoUzytkownika, cbxWybranaKlasa, nazwaPrzediotuDoZapisania);
+//				 try{
+//						System.out.println("cbxWybranaKlasa to(powinno byc: nazwajakiejsklasy : "+ cbxWybranaKlasa);
+//					}catch(Exception stringtocombo)
+//					{ 
+//						System.out.println("blad:" + stringtocombo); 
+//					} 

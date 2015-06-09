@@ -11,6 +11,8 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -91,6 +93,12 @@ public class Logowanie {
  
 		JTextField loginNick = new JTextField(20);
 		loginNick.setBounds(134, 185, 187, 31);
+		loginNick.addMouseListener(new MouseAdapter(){
+            @Override
+            public void mouseClicked(MouseEvent e){
+            	loginNick.setText("");
+            }
+        });
 		panel.add(loginNick);
 
 		JLabel passwordLabel = new JLabel("Haslo");
@@ -109,19 +117,15 @@ public class Logowanie {
 		panel.add(loginButton);
 		//Sluchacz zdarzen przycisku "Zaloguj".
 		String temp = "";
-		//userText.setText(imieUzytkownika + " " + nazwiskoUzytkownika);
+		loginNick.setText("np. Jan Kowalski");
 		loginButton.addActionListener(new ActionListener() 
-		{
-			
-			 
-			
-			public void actionPerformed(ActionEvent e) {
-			 
-					String imieInazwisko = loginNick.getText(); // get string from jtextfield
+		{  
+			public void actionPerformed(ActionEvent e) { 
+					String imieInazwisko = loginNick.getText(); 
 					
-						try
+					try
 					{
-
+						
 					//tworzenie zapytania
 					String query = "select * from teacher where login = ? and haslo = ?";
 					 
@@ -146,12 +150,7 @@ public class Logowanie {
 					{
 						count += 1; 
 					}
-					
-					//
-					
-
-					 
-					
+					  
 					if((count == 1)) 
 						{ 
 						JOptionPane.showMessageDialog(null, "Zalogowano pomyœlnie");	 
@@ -180,7 +179,7 @@ public class Logowanie {
 						System.out.println("Imie to: " + imieUsera + ". Nazwisko to: " + nazwiskoUsera);
 						if(( fNazwaFolderuUzytkownika.exists()))
 						{ 
-						JOptionPane.showMessageDialog(null, "Zalogowano pomyœlnie");	 
+						JOptionPane.showMessageDialog(null, "Zalogowano pomyœlnie"); 
 						frame.setVisible(false);
 						uruchomGlowneOknoAplikacji(imieInazwisko);
 						System.out.println("persona " + imieInazwisko);

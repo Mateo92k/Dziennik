@@ -26,17 +26,18 @@ public class Student {
 			
             public void run() 
             {  
-            	Student sss = new Student();
-            	sss.getStudentFirstName(2);
+            	Student student = new Student();
+            	student.getStudentFirstName(2, "null", "null");
             }
         });
 	}
 	
-	String getStudentFirstName(int indexImienia)
+	String getStudentFirstName(int indexImienia, String iN, String wybranaKlasa)
 	{
+		String imieInazwisko = iN;
 		List<String> list;
 		try {
-			list = Files.readAllLines(Paths.get("C:/dziennik/users/Michal Klich/studenci.txt" ), StandardCharsets.UTF_8);
+			list = Files.readAllLines(Paths.get("C:/DziennikElektroniczny/users/" + imieInazwisko + "/klasyInfo/" + wybranaKlasa + "/studenci.txt" ), StandardCharsets.UTF_8);
 		
 		String[] personaliaUczniow = list.toArray(new String[list.size()]);
 		int dl = personaliaUczniow.length;
@@ -62,7 +63,5 @@ public class Student {
 		}
 		
 		return null;
-		
-		
 	}
 }

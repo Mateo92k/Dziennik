@@ -41,8 +41,7 @@ public String[] args = {};
 			public void run() {
 				try {
 					Rejestrowanie window = new Rejestrowanie();
-					window.frame.setVisible(true);
-					
+					window.frame.setVisible(true); 
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -61,8 +60,9 @@ public String[] args = {};
 	    gm.loadDataAndRunApp(str); 
 	}
  
-	public void pobierzKatalogDomowy(String imieUzytkownika, String nazwiskoUzytkownika) 
+	public void pobierzKatalogDomowy(String imieUzytkownika, String nazwiskoUzytkownika, String nazwaKlasy, JFrame frame2) 
 	{
+		String nazwaKl = nazwaKlasy;
 		String i = imieUzytkownika;
 		String n = nazwiskoUzytkownika;
 		File[] paths; 
@@ -83,16 +83,20 @@ public String[] args = {};
 		    break;
 		    
 		} 
-		 sprawdzPoprawnoscFolderowInstalacyjnych(katalogDomowy, i, n);
+		 sprawdzPoprawnoscFolderowInstalacyjnych(katalogDomowy, i, n, nazwaKl, frame2);
+		 frame.dispose();
+		 frame2.disable();
 	}
 	
 	
 	
-	public void sprawdzPoprawnoscFolderowInstalacyjnych(String nazwaDysku, String imieUzytkownika, String nazwiskoUzytkownika) 
+	public void sprawdzPoprawnoscFolderowInstalacyjnych(String nazwaDysku, String imieUzytkownika, String nazwiskoUzytkownika, String nazwaKlasy, JFrame frame2) 
 	{
 		//usun ostatni znak '/' z pobranej sciezki i zamien na '//'
 		String sciezkaDoProgramu = katalogDomowy;
+		String imieInazwisko = imieUzytkownika + " " + nazwiskoUzytkownika;
 		pobierzNazweDysku(nazwaDysku);
+		String nk = nazwaKlasy;
 		
 		System.out.println("Nazwa montowanego dysku " + nazwaDysku);
 		
@@ -101,27 +105,54 @@ public String[] args = {};
 		File fSciezkaDoProgramu = new File(strFfolderInstalacyjny );
 		stworzFolderInstalacyjnyJesliPotrzeba(fSciezkaDoProgramu);
 		stworzKatalogDoPrzechowywaniaKontUzytkownikow(fSciezkaDoProgramu);
-		stworzFolderUzytkownika(fSciezkaDoProgramu, imieUzytkownika, nazwiskoUzytkownika); 
-		stworzFolderKlasyInfo(fSciezkaDoProgramu, imieUzytkownika, nazwiskoUzytkownika);
-		stworzFolderZListaKlasUzytkownika(fSciezkaDoProgramu, imieUzytkownika, nazwiskoUzytkownika);
-		stworzFolderWKlasyInfoZPodanaKlasa(fSciezkaDoProgramu, imieUzytkownika, nazwiskoUzytkownika);
-		stworzPlikStudenciTxt(fSciezkaDoProgramu, imieUzytkownika, nazwiskoUzytkownika);
-		  // tworzenie ..\\data\\klasa\\
-		stworzFolderData(fSciezkaDoProgramu);
-		stworzFolderKlasywData(fSciezkaDoProgramu);
-		stworzIDodajFolderDlawprowadzonejKlasy(fSciezkaDoProgramu);
-		System.out.println("Zakonczono metode ( sprawdzPoprawnoscFolderowInstalacyjnych ) ");
+		stworzFolderUzytkownika(fSciezkaDoProgramu, imieUzytkownika, nazwiskoUzytkownika, nk, frame2); 
+		 
+		 
 
 		 
 	}
-	public void stworzIDodajFolderDlawprowadzonejKlasy(File fSciezkaDoProgramu)
+	public void stworzIDodajFolderDlawprowadzonejKlasy(File fSciezkaDoProgramu, String imieInazwisko, String nazwaKlasy)
 	{
 		File fKlasyWDataNowaKlasa = new File("c:\\DziennikElektroniczny\\data\\klasyInfo\\" + txtNazwaKlasy.getText());
+		File file = new File("c:\\DziennikElektroniczny\\users\\" + imieInazwisko + "\\klasyInfo\\" + nazwaKlasy + "\\studenci.txt.txt");
+		File filePrzedmioty = new File("c:\\DziennikElektroniczny\\users\\" + imieInazwisko + "\\klasyInfo\\" + nazwaKlasy + "\\przedmioty.txt.txt");
 		if (!fKlasyWDataNowaKlasa.exists()) 
 		  { 
 			  stworzFolder(fKlasyWDataNowaKlasa); 
 			  System.out.println("Stworzono" + fKlasyWDataNowaKlasa); 
 		  }
+		 
+		 stworzPlikStudenciTxt(file, imieInazwisko, nazwaKlasy);
+		 
+		 
+		 
+	}
+	
+	void stworzPlikTxtZDanymiUczniow(File file, String imieInazwisko, String nazwaKLasy)
+	{
+		File fStudenciTxt = file;
+		if (!fStudenciTxt.exists()) 
+		  { 
+			try { 
+			      if (file.createNewFile()){
+			        System.out.println("File is created!");
+			      }else{
+			        System.out.println("File already exists.");
+			      }
+		 
+		    	} catch (IOException e) 
+			{
+			      e.printStackTrace();
+			}
+			  System.out.println("InfoLog nr2 " + fStudenciTxt); 
+		  }
+		
+		if(fStudenciTxt.exists())
+		{
+			System.out.println(fStudenciTxt + ":  Istnieje");
+		}
+		
+		
 	}
 	
 	public void stworzFolderKlasywData(File fSciezkaDoProgramu)
@@ -135,7 +166,7 @@ public String[] args = {};
 	}
 	
 	public void stworzFolderData(File fSciezkaDoProgramu)
-	{
+	{ 
 		File fKatalogDanychAplikacji = new File("c:\\DziennikElektroniczny\\data");
 		if (!fKatalogDanychAplikacji.exists()) 
 		  { 
@@ -146,39 +177,113 @@ public String[] args = {};
 	
 	public void stworzPlikStudenciTxt(File fSciezkaDoProgramu, String imieUzytkownika, String nazwiskoUzytkownika)
 	{
-		String strStudenci ="C:/DziennikElektroniczny/users/" + imieUzytkownika + " " + nazwiskoUzytkownika + "//klasyInfo//" + txtNazwaKlasy.getText() + "/studenci.txt.txt";  
+		String strStudenci ="C://DziennikElektroniczny/users//" + imieUzytkownika + " " + nazwiskoUzytkownika + "//klasyInfo//" + txtNazwaKlasy.getText() + "//studenci.txt";  
 		 File fStudenci = new File(strStudenci);
-	 
-		//txtNazwaKlasy
-		 
 		 FileWriter fileWriter;
 		 if(!fStudenci.exists() && !fStudenci.isDirectory())
 		 {
+			  System.out.println("Brak pliku studenci.txt");
+			 
+				if (!fStudenci.exists()) 
+				  { 
+					try { 
+					      if (fStudenci.createNewFile()){
+					        System.out.println("File is created!");
+					      }else{
+					        System.out.println("File already exists.");
+					      }
+				 
+				    	} catch (IOException e) {
+					      e.printStackTrace();
+					}
+					  System.out.println("InfoLog nr2 " + fStudenci); 
+				  }
 			  
-			 try 
-			 {
-				 		//tworzy plik txt
-				 		fileWriter = new FileWriter(fStudenci);
-						PrintWriter printWriter = new PrintWriter(fileWriter);
-						
-						//Dodaj tekst do pliku nie usuwaj¹c zawartoœci obecnej w pliku
-						try(PrintWriter output = new PrintWriter(new FileWriter(fStudenci,false))) 
-					{ 
-						//zapisywanie cos do pliku
-					    output.printf("%s\r\n", " ");
-					     
-					}  
-						
+		 }
 		 
-				}
-		 	catch (IOException e2) 
-			{
-				e2.printStackTrace();
-			}
+		 //fOCeny
+			String strOceny ="C://DziennikElektroniczny/users//" + imieUzytkownika + " " + nazwiskoUzytkownika + "//klasyInfo//" + txtNazwaKlasy.getText() + "//Obecnosci//";  
+			 File fOceny = new File(strOceny);
+			 FileWriter fileWriter1;
+			 if(!fOceny.exists() && !fOceny.isDirectory())
+			 {
+				  System.out.println("Brak pliku fOceny(.txt)");
+				 
+					if (!fOceny.exists()) 
+					  { 
+						try { 
+						      if (fOceny.createNewFile()){
+						        System.out.println("Plik fOceny stworzony");
+						      }else{
+						        System.out.println("Plik fOceny istnieje");
+						      }
+					 
+					    	} catch (IOException e) {
+						      e.printStackTrace();
+						}
+						  System.out.println("InfoLog nr2 " + fStudenci); 
+					  }
+				  
+			 }
+		 
+		 String strPrzedmioty ="C://DziennikElektroniczny/users//" + imieUzytkownika + " " + nazwiskoUzytkownika + "//klasyInfo//" + txtNazwaKlasy.getText() + "//przedmioty.txt";  
+		 File fPrzedmioty = new File(strPrzedmioty);
+		 if(!fPrzedmioty.exists() && !fPrzedmioty.isDirectory())
+		 {
+			  System.out.println("Brak pliku przedmioty.txt");
+			 
+				if (!fPrzedmioty.exists()) 
+				  { 
+					try { 
+					      if (fPrzedmioty.createNewFile()){
+					        System.out.println("File fPrzedmioty created!");
+					      }else{
+					        System.out.println("File already exists.");
+					      }
+				 
+				    	} catch (IOException e) {
+					      e.printStackTrace();
+					}
+					  System.out.println("InfoLog nr2 " + fStudenci); 
+					  
+				  }
+				
+		
 			  
 		 }
 
 		else System.out.println("Folder do przechowywania informacjach o klasach które uczy uzytkownik ( " + fStudenci  + ") istnieje."); 
+		 String in =  imieUzytkownika +  " " + nazwiskoUzytkownika;
+		 AddStudent addstudent = new AddStudent();
+		  addstudent.createGui(in, strStudenci);
+		  /**
+		   * Tworzenie metody tworzoccej folder dla ocen
+		   */
+			/**
+			 * Tworzenie metody tworz¹cej folder dla ocen gdzie bed¹ zpaisywanie
+			 */
+					String strOceny1 ="C://DziennikElektroniczny/users//" + imieUzytkownika + " " + nazwiskoUzytkownika + "//klasyInfo//" + txtNazwaKlasy.getText() + "//oceny.txt";  
+					 File fOceny1 = new File(strOceny1);
+					 if(!fOceny1.exists() && !fOceny1.isDirectory())
+					 {
+						  System.out.println("Brak pliku fOceny.txt");
+						 
+							if (!fOceny1.exists()) 
+							  { 
+								try { 
+								      if (fOceny1.createNewFile()){
+								        System.out.println("File fPrzedmioty created!");
+								      }else{
+								        System.out.println("File already exists.");
+								      }
+							 
+							    	} catch (IOException e) {
+								      e.printStackTrace();
+								}
+								  System.out.println("InfoLog nr2 " + fOceny1); 
+							  }
+				  
+			 }
 	}
 	
 	public void stworzFolderWKlasyInfoZPodanaKlasa(File fSciezkaDoProgramu, String imieUzytkownika, String nazwiskoUzytkownika)
@@ -189,16 +294,17 @@ public String[] args = {};
 		stworzFolder(fDodaniePodanejKlasyDoKatalogu);  
 	}
 	
-	public void przekieruj()
-	{
-				JOptionPane.showMessageDialog(null, "Rejestracja przebieg³a pomyœlnie. Mo¿esz siê zalogowaæ.");	 
-				  frame.dispose();
-				 Logowanie.main(args);
-	}
+	//todo:odkomnentowac
+//	public void przekieruj(JFrame frame)
+//	{
+//				JOptionPane.showMessageDialog(null, "Rejestracja przebieg³a pomyœlnie. Mo¿esz siê zalogowaæ.");	 
+//				  frame.dispose();
+//				 Logowanie.main(args);
+//	}
 	
 	public void stworzFolderZListaKlasUzytkownika(File fSciezkaDoProgramu, String imieUzytkownika, String nazwiskoUzytkownika) 
 	{
-		String strUczyKlasy ="C:/DziennikElektroniczny/users/" + imieUzytkownika + " " + nazwiskoUzytkownika + "/uczyKlasy.txt.txt";  
+	     String strUczyKlasy ="C:/DziennikElektroniczny/users/" + imieUzytkownika + " " + nazwiskoUzytkownika + "/uczyKlasy.txt.txt";  
 		 File fUczyKlasy = new File(strUczyKlasy);
 	 
 		//txtNazwaKlasy
@@ -228,8 +334,8 @@ public String[] args = {};
 				e2.printStackTrace();
 			}
 			  
-		 }
- 
+		}
+		
 		else System.out.println("Folder do przechowywania informacjach o klasach które uczy uzytkownik ( " + fUczyKlasy  + ") istnieje."); 
 	}
 	
@@ -245,13 +351,27 @@ public String[] args = {};
 		else System.out.println("Folder do przechowywania informacjach o klas istnieje uzytkownikow ( " + fKlasyInfo  + ") istnieje."); 
 	}
 	
-	public void stworzFolderUzytkownika(File fSciezkaDoProgramu, String imieUzytkownika, String nazwiskoUzytkownika) 
+	public void stworzFolderUzytkownika(File fSciezkaDoProgramu, String imieUzytkownika, String nazwiskoUzytkownika, String nk, JFrame frame2) 
 	{
 		String strNazwaFolderuUzytkownika = fSciezkaDoProgramu + "//users//" + imieUzytkownika + " " + nazwiskoUzytkownika; 
 		File fNazwaFolderuUzytkownika = new File(strNazwaFolderuUzytkownika);
 		if(!fNazwaFolderuUzytkownika.exists())
 		{
+			
 			stworzFolder(fNazwaFolderuUzytkownika); 
+			stworzFolderKlasyInfo(fSciezkaDoProgramu, imieUzytkownika, nazwiskoUzytkownika);
+			stworzFolderZListaKlasUzytkownika(fSciezkaDoProgramu, imieUzytkownika, nazwiskoUzytkownika);
+			stworzFolderWKlasyInfoZPodanaKlasa(fSciezkaDoProgramu, imieUzytkownika, nazwiskoUzytkownika);
+			stworzPlikStudenciTxt(fSciezkaDoProgramu, imieUzytkownika, nazwiskoUzytkownika);
+			  // tworzenie ..\\data\\klasa\\
+			stworzFolderData(fSciezkaDoProgramu);
+			stworzFolderKlasywData(fSciezkaDoProgramu);
+			stworzIDodajFolderDlawprowadzonejKlasy(fSciezkaDoProgramu,  imieUzytkownika,  nazwiskoUzytkownika);  
+			
+			
+			System.out.println("Zakonczono metode ( sprawdzPoprawnoscFolderowInstalacyjnych ) "); 
+			JOptionPane.showMessageDialog(null, "Konto stworzone. Proszê wprowadziæ przynajmniej jednego ucznia aby kontynuowaæ.");	 
+  		
 		}
 		else
 		{
@@ -269,7 +389,13 @@ public String[] args = {};
 		{
 			stworzFolder(fFolderDoPrzechowywaniaUzytkownikow);
 		}
-		else System.out.println("Folder do przechowywania danych uzytkownikow ( " + fFolderDoPrzechowywaniaUzytkownikow  + ") istnieje.");
+		else
+		{
+			System.out.println("Folder do przechowywania danych uzytkownikow ( " + fFolderDoPrzechowywaniaUzytkownikow  + ") istnieje.");
+		}
+		
+		
+		
 	}
 	
 	public void stworzFolder(File fSciezkaDoProgramu) 
@@ -339,19 +465,19 @@ public String[] args = {};
 		panel.setLayout(null);
   
 		JTextField txtImie = new JTextField(20);
-		txtImie.setBounds(134, 185, 187, 31);
+		txtImie.setBounds(134, 100, 187, 31);
 		panel.add(txtImie);
 
 		JTextField txtNazwisko = new JTextField(20);
-		txtNazwisko.setBounds(134, 225, 187, 31);
+		txtNazwisko.setBounds(134, 135, 187, 31);
 		panel.add(txtNazwisko);
 		
 		JLabel passwordLabel = new JLabel("Haslo");
-		passwordLabel.setBounds(92, 275, 62, 14);
+		passwordLabel.setBounds(92, 170, 62, 14);
 		panel.add(passwordLabel);
 
 		JTextField passwordText = new JTextField(20);
-		passwordText.setBounds(134, 267, 187, 31);
+		passwordText.setBounds(134, 170, 187, 31);
 		panel.add(passwordText);
 
 //		JButton btnChooseFolder = new JButton("Wybierz folder instalacyjny");
@@ -390,10 +516,12 @@ public String[] args = {};
 				
 				String imieUzytkownika =  txtImie.getText();
 				String nazwiskoUzytkownika =  txtNazwisko.getText();
+				String NazwaKlasy =  txtNazwaKlasy.getText();
 				if (!txtImie.getText().isEmpty() && !txtNazwisko.getText().isEmpty() && !txtNazwaKlasy.getText().isEmpty())
 					{ 
 									System.out.println("Pola: imie uzytk. i nazwisko s¹ poprawne.");
-									pobierzKatalogDomowy(imieUzytkownika, nazwiskoUzytkownika); 	  
+									pobierzKatalogDomowy(imieUzytkownika, nazwiskoUzytkownika, NazwaKlasy, frame); 	  
+									 
 					}
 				else JOptionPane.showMessageDialog(null, "Wype³nij wszystkie pola.");	 
 				  
@@ -425,25 +553,54 @@ public String[] args = {};
 		frame.getContentPane().add(panel);
 		
 		JLabel lblImie = new JLabel("Imie");
-		lblImie.setBounds(88, 193, 92, 14);
+		lblImie.setBounds(88, 100, 92, 14);
 		panel.add(lblImie);
 		
 		JLabel lblNazwisko = new JLabel("Nazwisko");
-		lblNazwisko.setBounds(68, 235, 92, 14);
+		lblNazwisko.setBounds(68, 135, 92, 14);
 		panel.add(lblNazwisko);
 		
-		JLabel lblNazwaKlasy = new JLabel("Nazwa Klasy któr¹ uczysz:");
-		lblNazwaKlasy.setBounds(70, 115,  187, 32);
+		JLabel lblNazwaKlasy = new JLabel("Podaj klasê któr¹ uczysz");
+		lblNazwaKlasy.setBounds(70, 220,  187, 32);
 		panel.add(lblNazwaKlasy);
 		
 		txtNazwaKlasy = new JTextField();
-		txtNazwaKlasy.setBounds(228, 120, 92, 24);
-		panel.add(txtNazwaKlasy);
+		txtNazwaKlasy.setBounds(228, 220, 92, 24);
+		 panel.add(txtNazwaKlasy);
 		
 		JLabel lblDziennikElektroniczny = new JLabel("               Dziennik Elektroniczny ");
 		lblDziennikElektroniczny.setFont(new Font("Tahoma", Font.PLAIN, 22));
 		lblDziennikElektroniczny.setBounds(0, 0, 444, 48);
 		panel.add(lblDziennikElektroniczny);
+		
+		JButton btnDodajUczniow = new JButton("Dodaj uczniów");
+		btnDodajUczniow.setBounds(195, 250, 122, 24);
+		btnDodajUczniow.setEnabled(false);
+		btnDodajUczniow.setVisible(false);
+		panel.add(btnDodajUczniow);
+		
+		JButton btnDodajKlase = new JButton("Dodaj klase");
+		btnDodajKlase.setBounds(70, 250, 115, 24);
+		btnDodajKlase.addActionListener(new ActionListener() 
+		{
+			String imieUzytkownika =  txtImie.getText();
+			String nazwiskoUzytkownika =  txtNazwisko.getText();
+			public void actionPerformed(ActionEvent e)
+			{
+			
+				if(!txtImie.getText().isEmpty() && !txtNazwisko.getText().isEmpty() && !txtNazwaKlasy.getText().isEmpty())
+				{ 
+					frame.dispose();
+					String imieUzytkownika =  txtImie.getText();
+					AddNewClass adc = new AddNewClass(); 
+				}
+				else JOptionPane.showMessageDialog(null, "Pola: imie, nazwisko oraz nazwa klasy musz¹ byæ poprawnie wype³nione przed t¹ operacj¹.");	 
+			}
+			
+		});
+		btnDodajKlase.setEnabled(false);
+		btnDodajKlase.setVisible(false);
+		panel.add(btnDodajKlase);
 		
 //		JLabel label = new JLabel("");
 //		label.setIcon(new ImageIcon(Rejestrowanie.class.getResource("/res/Login.png")));

@@ -1,0 +1,2 @@
+Lp.	Imie	Nazwisko	Aktyw.	Odp. ustna	Praca dom.	Spr.	Praca kl.	Œr.	Oc. koñcowa	
+1.	fooImieUcznia1	fooNazwiskoUcznia1								

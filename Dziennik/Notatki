@@ -1,0 +1,30 @@
+        		 -------------------- 		 --------------------    		 --------------------    		 --------------------
+	//deklaracja nad konstruktorem
+	String strSciezkaDoKataloguDomowegoUzytkownika, imie, nazwisko, wychowankowie;
+	String[] wszystkieKlasy,uczeKlasy;
+	
+	//przeci¹zanie funkcji wywo³ane z klasa 'wysy³ana'
+	( strSciezkaDomowa,  imieUzytkownika,  nazwiskoUzytkownika,  wszystkieKlasy,  uczyKlasy,  wychowankowie)
+	 
+	//konstrukcja prze³adowanej funkcji w klasie która otrzymuje parametry. Klasa 'odbierana' 
+	String strFName, String firstName, String lastName, String[] listOfAllClass, String[] listClassIteach, String KlasaWychowankowie  
+	 
+	//przypisywanie do lokalnych zmiennych parametrów z funkcji przeci¹¿onej:
+		     String strSciezkaDomowa = strFName;
+    		 String imieUzytkownika = firstName;
+    		 String nazwiskoUzytkownika = lastName;
+    		 String[] wszystkieKlasy =  listOfAllClass;
+    		 String[] uczyKlasy = listClassIteach;
+    		 String wychowankowie = KlasaWychowankowie;
+      		 --------------------  		 --------------------    		 --------------------    		 --------------------
+
+Tworzenie pustego pliku txt:
+	String sciezka = "somePath";
+	File f2 = new File(sciezka);
+				try {
+					f2.createNewFile();
+				} catch (IOException e1) { 
+					e1.printStackTrace();
+				}
+				
+				

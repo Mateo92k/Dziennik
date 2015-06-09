@@ -2,6 +2,7 @@ package Dziennik;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.SystemColor;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
@@ -9,12 +10,16 @@ import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -23,9 +28,10 @@ public class AddStudent {
 	
 	private static JButton  bAdd, bSaveAndExit, bExitWithoutSave;
 	 
-	public void createGui(String fullname)
+	public void createGui(String imieInazwisko, String sciezkaDoKlasy)
 	{
-		
+		String iN = imieInazwisko;
+		String sciezkaDoStudenciTxt = sciezkaDoKlasy;
 		JFrame f = new JFrame("Dodawanie uczniów");
 		f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		f.setSize(740, 130);
@@ -71,57 +77,13 @@ public class AddStudent {
 			@Override
 			public void mouseClicked(MouseEvent e) 
 			{
-				 System.out.println("Button work");
-				 File file = new File("c:\\dziennik\\users\\" + fullname + "\\studenci.txt");
-				 FileWriter fileWriter;
-				 if(!file.exists() && !file.isDirectory())
-				 {
-					
-					 try 
-					 {
-						 	//tworzy plik txt
-						 	fileWriter = new FileWriter(file);
- 							PrintWriter printWriter = new PrintWriter(fileWriter);
- 							
- 							//Dodaj tekst do pliku nie usuwaj¹c zawartoœci obecnej w pliku
- 							try(PrintWriter output = new PrintWriter(new FileWriter(file,false))) 
-							{ 
-							    output.printf("%s\r\n", txtImie.getText() + " " + txtNazwisko.getText());
-							    System.out.println("Dodano studenta: " +  txtImie.getText() + " " +   txtNazwisko.getText())  ; 
-							    txtImie.setText("");  txtNazwisko.setText("");
-							}  
- 					}
-					 catch (IOException e2) 
-					 {
- 							e2.printStackTrace();
- 					}
-				 }
-				 
-				 if(file.exists() && !file.isDirectory())
-				 {
-					 try 
-					 {
-						 try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true))))
-							{
-							    out.println(    txtImie.getText() + " " + txtNazwisko.getText());
-							    
-//							//Dodaj tekst do pliku nie usuwaj¹c zawartoœci obecnej w pliku
-//							try(PrintWriter output = new PrintWriter(new FileWriter(file,true))) 
-//							{
-//							    output.printf("%s\r\n ", txtImie.getText() + " " + txtNazwisko.getText());
-//							    System.out.println("Dodano studenta: " +  txtImie.getText() + " " +   txtNazwisko.getText())  ; 
-//							    txtImie.setText("");  txtNazwisko.setText("");
-							}  
-					}
-					
-					 catch (IOException e2)
-					 		{
-								e2.printStackTrace();						
-							 }
-				 f.dispose();	
-				 GuiMain guimain = new GuiMain();
-				 guimain.loadDataAndRunApp(fullname);
-				 }
+				f.dispose();
+				f.setVisible(false);
+				  String imieUcznia = txtImie.getText();
+				  String nazwiskoUcznia = txtNazwisko.getText();
+				  
+				  sprawdzCzyIstniejeFolderZListaUczniow(iN, sciezkaDoKlasy);
+				  dodajStudenta(imieUcznia, nazwiskoUcznia, sciezkaDoKlasy, f);
 			}
 		});
 		
@@ -130,12 +92,62 @@ public class AddStudent {
 		
 	}
 	
+	void dodajStudenta(String imieUcznia, String nazwiskoUcznia, String sciezkaDoKlasy, JFrame f)
+	{
+		f.dispose();
+		File fStudenci = new File(sciezkaDoKlasy); 
+		System.out.println("TODO: " + sciezkaDoKlasy);
+		String text = imieUcznia +  " "  + nazwiskoUcznia;
+ 		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fStudenci, true))))
+		{
+ 			f.dispose();
+		    out.println(text);  
+		    System.out.println("Udalo sie dodac klase(nowa linijke do pliku txt");
+			JOptionPane.showMessageDialog(null, "Rejestracja przebieg³a pomyœlnie. Mo¿esz siê zalogowaæ");
+			Logowanie.runClassLogowanie(null, null);
+			f.dispose();
+			f.setVisible(false);
+		} 
+		
+		catch (IOException e1) 
+		{
+			 System.out.println("Nie udalo sie dodac nowej linijki do pliku(brak odpowiednich plikow)");
+		}  
+ 		finally{
+ 			f.dispose();
+ 		}
+	}
+		
+	
+	void sprawdzCzyIstniejeFolderZListaUczniow(String iN, String sciezkaDoStudenciTxt)
+	{
+		String imieInazwisko = iN;
+		String PathstudenciTxt = sciezkaDoStudenciTxt;
+		File file= new File(PathstudenciTxt);
+		 
+		if(!file.exists())
+		{
+			try { 
+			      if (file.createNewFile()){
+			        System.out.println("File is created!");
+			      }else{
+			        System.out.println("File already exists.");
+			      }
+		 
+		    	} catch (IOException e) 
+			{
+			      e.printStackTrace();
+			}
+		}
+		else System.out.println("Folder do przechowywania danych uzytkownikow ( " + file  + ") istnieje.");
+	}
+	
 	public static void main(String[] args){
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			
             public void run() {
-            	 AddStudent as = new AddStudent();
-            	 as.createGui("Michal Klich");
+//            	 AddStudent as = new AddStudent();
+//            	 as.createGui(null, null);
  				 
             	 //Komenda wyzej zakomentowana bo po wcisnieciu przycisku "dodaj klase" okno uruchamia sie dwa razy  
             }

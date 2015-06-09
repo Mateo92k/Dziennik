@@ -11,12 +11,18 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -27,6 +33,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultCellEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -42,6 +49,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListCellRenderer;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -50,9 +58,18 @@ import javax.swing.table.TableModel;
 
 import Dziennik.GuiMain.MyComboBoxRenderer;
 import Dziennik.GuiMain.MyComboBoxRenderer1;
+import Dziennik.GuiMain.MyComboBoxRenderer2;
+import Dziennik.GuiMain.MyComboBoxRenderer3;
+import Dziennik.GuiMain.MyComboBoxRenderer4;
+import Dziennik.GuiMain.MyComboBoxRenderer5;
+import Dziennik.GuiMain.MyComboBoxRenderer6;
 
-public class DziennikOcen extends  JFrame implements ActionListener{
+public class DziennikOcen extends  JFrame implements ActionListener,   java.io.Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	int lp[];
 	String[] imie;
 	String[] nazwisko;
@@ -60,34 +77,34 @@ public class DziennikOcen extends  JFrame implements ActionListener{
 	double[] sredniaOcen;
 	int[] ocenaProponowana;
 	int[] ocenaKoncowa;
-	
+	private static JLabel lblSeparator;
+	String wybranyDziennik ;
 	JButton btnZapisz, btnEksportuj;
+	JRadioButton[] radiobtn;
 		private static JButton bModulKlas, bModulOcen, bModulObecnosci, bHome, bWyloguj, bSzukaj, bZapiszTabele;
-    	private static JLabel lblInformacje, lblRokSzkolny, lblAktualnyPrzedmiot, lblObecnychStudentow, lblSeparator,lblSeparator2, lblTime,lblDay, lblVersion;
+    	private static JLabel lblInformacje, lblRokSzkolny, lblAktualnyPrzedmiot, lblObecnychStudentow, lblSeparator2, lblTime,lblDay, lblVersion;
       
     	String strTime = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime());
     	String strDay = new SimpleDateFormat("dd-MM-yyyy").format(Calendar.getInstance().getTime());
   
     	final String zalogowanoJako = "Zalogowano jako: ";
-		public String   wychowankowie, nazwaFolderuUzytkownika, persona, userName;
+		public String   wychowankowie, imieInazwisko, persona, userName, imieUzytkownika, nazwiskoUzytkownika;
 		public String[] uczeKlasy, wszystkieKlasy;
 		public String[] args = {};
 		//zmienna przechowujaca przedmioty tej klasy, w konstruktorze dopisac by pobieral te przedmioty z plku
 		public String[] przedmioty = {"Polski", "Geografia", "Matematyka"};
 		JRadioButton rb1;
 		JScrollPane scrollPaneTable;
-		private String[] labelString = {"WprowadŸ ocene", "Dane ucznia",  "Nazwa kolumny", "Obliczenia"};
-	public static void main(String[] args)
+		public static void main(String[] args)
 	{
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			
             public void run() { 
-            	 
-            	 DziennikOcen dziennikocen = new DziennikOcen();
-            	 //parametry po kolei: 1.String folderName, 2.imie, 3.nazwisko, String[] listOfAllClass, String[] listClassIteach, String KlasaWychowankowie) 
-            	  dziennikocen.createGui("Michal Klich", "Michal Klich", "Michal Klich", null, null, null);
- 				 
-            	 //Komenda wyzej zakomentowana bo po wcisnieciu przycisku "dodaj klase" okno uruchamia sie dwa razy  
+            DziennikOcen dziennikocen = new DziennikOcen();
+            
+            // (String iN, String imieUser, String nazwiskoUser, String[] arKlasyWszystkie, String[] arUczeKLasy, String strUczeKlase, String strWybranyDziennik) 
+            dziennikocen.createGui("fooImie fooNazwisko", "fooImie", "fooNazwisko", null, null, "uczeKlaseFoo", "uczeKlaseFoo");
+            	
             }
         });
 	}
@@ -100,8 +117,8 @@ public class DziennikOcen extends  JFrame implements ActionListener{
 	public JMenuBar createJMenuBar()  
     	{
     		JMenuBar mainMenuBar;
-    		JMenu menuPlik, menuWidok, menuNowy, menuPrzejdz, menuNarzedzia, menuPomoc;
-    		JMenuItem NowyMenuItem, OtworzBazeMenuItem, ZapiszMenuItem, Odswie¿MenuItem, DrukujMenuItem, WylogujMenuItem, WyjdzMenuItem ;
+    		JMenu menuPlik, menuWidok, menuNowy, menuNarzedzia, menuPomoc;
+    		JMenuItem NowyMenuItem, ZapiszMenuItem, Odswie¿MenuItem, DrukujMenuItem, WylogujMenuItem, WyjdzMenuItem ;
     		
     		mainMenuBar = new JMenuBar();
     		menuPlik = new JMenu("Plik");
@@ -141,19 +158,20 @@ public class DziennikOcen extends  JFrame implements ActionListener{
     		mainMenuBar.add(menuPomoc);
     		return mainMenuBar;
     	}
-	
-	public void createGui(String folderName, String firstName, String lastName, String[] listOfAllClass, String[] listClassIteach, String KlasaWychowankowie) 
-    {
-		
-			nazwaFolderuUzytkownika = folderName; 
-    		wszystkieKlasy = listOfAllClass;
-    		uczeKlasy = listClassIteach;
-    		wychowankowie = KlasaWychowankowie;
-    		persona = imie + " " + nazwisko; 
-    		  userName = folderName;
-    		//frame settings..
-    		JFrame frame = new JFrame("Dziennik Elektroniczny - Dziennik ocen");
-    		 
+ //("Jan Kowalski", "Jan", "Kowalski", null, null, "3A", "3A");
+	public void createGui(String iN, String imieUser, String nazwiskoUser, String[] arKlasyWszystkie, String[] arUczeKLasy, String strWychowankowie, String strWybrDziennik) 
+    { 
+			imieInazwisko = iN; 
+			imieUzytkownika = imieUser;
+			nazwiskoUzytkownika = nazwiskoUser;
+    		wszystkieKlasy = arKlasyWszystkie;
+    		uczeKlasy = arUczeKLasy;
+    		wychowankowie = strWychowankowie;
+    		  wybranyDziennik = strWybrDziennik;
+    		persona = imieUser + " " + nazwiskoUser; 
+    		userName = iN;
+     
+    		JFrame frame = new JFrame("Dziennik Elektroniczny - Dziennik ocen"); 
     		GuiMain app = new GuiMain();
     		frame.setJMenuBar(app.createJMenuBar()); 
      		frame.setResizable(true);
@@ -188,8 +206,6 @@ public class DziennikOcen extends  JFrame implements ActionListener{
     		bSep4.setBorderPainted(false);
     		
     		Color blueColor = new Color( 0, 0, 0);
-    		Color hrefColor = new Color( 31, 69, 252);
-     		
     		/**
      	    * Create Panel1
      		*/
@@ -197,9 +213,6 @@ public class DziennikOcen extends  JFrame implements ActionListener{
     		p1.setLayout(new BoxLayout(p1, BoxLayout.X_AXIS)); // ustawienie ikon w lini poziomej
     		p1.setBackground(Color.WHITE);
    
-    		//tworzenie komponentow do panelu1
-    		ImageIcon seppion = new ImageIcon("/res/seppion.png");
-    		
     		JLabel lblLogo = new JLabel();
     		lblLogo.setCursor(new Cursor(Cursor.HAND_CURSOR)); 
     		lblLogo.setIcon(new ImageIcon(Wyszukiwanie.class.getResource("/res/logo4m.png")));
@@ -207,6 +220,7 @@ public class DziennikOcen extends  JFrame implements ActionListener{
             {
                 public void mouseClicked(MouseEvent evt)
                 {
+                	frame.dispose();
                 	GuiMain gm = new GuiMain();
                 	gm.loadDataAndRunApp(persona);
                 	System.out.println("Powrót do g³ównego okna."); 
@@ -221,8 +235,10 @@ public class DziennikOcen extends  JFrame implements ActionListener{
                 {
                 	frame.dispose();
                 	System.out.println("Powinno otworzyc TwojeKlasy.java ");  
-                	TwojeKlasy tk = new TwojeKlasy();
-					tk.wczytajDane(folderName, firstName, lastName, listOfAllClass, listClassIteach, KlasaWychowankowie);
+                	
+                	//todo: nieprzejrzana metoda, wiec zakomentowana
+//                	TwojeKlasy tk = new TwojeKlasy();
+//					tk.wczytajDane(iN, imieUzytkownika, nazwiskoUzytkownika, arKlasyWszystkie, arUczeKLasy, strWychowankowie, wybranyDziennik);
 //					for (int i = 0 ; i < uczeKlasy.length ; i ++)
 //					{
 //						System.out.println(uczeKlasy[i]); 
@@ -266,12 +282,12 @@ public class DziennikOcen extends  JFrame implements ActionListener{
 
 	    	
 			 
-    		JButton btnZamknijDziennik = new JButton("Powrót");
+    		JButton btnZamknijDziennik = new JButton("Zamknij okno i powróæ.");
     		btnZamknijDziennik.setCursor(new Cursor(Cursor.HAND_CURSOR)); 
     		btnZamknijDziennik.setFont(btnZamknijDziennik.getFont().deriveFont(11.0f));
     		//clearSelectionButton.setIcon(new ImageIcon(Wyszukiwanie.class.getResource("/res/homepage.png")));
     		btnZamknijDziennik.setBackground(Color.WHITE);
-    		btnZamknijDziennik.setPreferredSize(new Dimension(108, 48));
+    		btnZamknijDziennik.setPreferredSize(new Dimension(138, 48));
     	
     		btnZamknijDziennik.setOpaque(false);
     		btnZamknijDziennik.setBorder(null);
@@ -279,7 +295,15 @@ public class DziennikOcen extends  JFrame implements ActionListener{
     		btnZamknijDziennik.setBorderPainted(false);
     		btnZamknijDziennik.setForeground(blueColor);
     		btnZamknijDziennik.setVisible(true);
-       		  
+       		 btnZamknijDziennik.addActionListener(new ActionListener() {
+    			public void actionPerformed(ActionEvent e) {
+    				{
+    					GuiMain gm = new GuiMain();
+    					gm.loadDataAndRunApp(persona);
+    					
+    				}
+    			}
+    		});
     
     		JLabel lblDziennik = new JLabel();
     		lblDziennik.setIcon(new ImageIcon(Wyszukiwanie.class.getResource("/res/dziennikm.png")));
@@ -310,25 +334,261 @@ public class DziennikOcen extends  JFrame implements ActionListener{
     		/**
     		 * Create Panel2
     		 */
-     		JPanel p2 = new JPanel();
-     		p2.setVisible(false);
-    		p2.setBounds(1,61,1360,50);
-    		p2.setLayout(new BoxLayout(p2, BoxLayout.X_AXIS)); // !! SKOPIOWAC to do panelu lewego - ZMIEN w kodzie po lewej "x-axis"na "Y-AXIS" aby zobaczyc o co chodzi.
-    		p2.setBackground(Color.GREEN);
- 
-    		System.out.println("imie: " + firstName + ", nazwisko " +lastName);
-	try
-	{  
-		File fSprawdzContent;
+    		JPanel p2 = new JPanel();
+    		p2.setVisible(true);
+    		p2.setBounds(1, 61, 1360, 50);
+    		p2.setLayout(new BoxLayout(p2, BoxLayout.X_AXIS));  
+    		
+    		JPanel p3 = new JPanel();
+    		p3.setVisible(true);
+    		p3.setBounds(1, 61, 1360, 50);
+    		p3.setLayout(new BoxLayout(p3, BoxLayout.X_AXIS)); 
+    		
+//    		JButton[] btnDlaKlasy = null;
+//    		for(int i = 0 ; i < uczeKlasy.length; i++)
+//    		{
+//    			btnDlaKlasy[i] = new JButton("s");
+//    			p3.add(btnDlaKlasy[i]);
+//    		}
+    		
+//    		int iloscRadioBtn;
+//    		System.out.println("uczeklasy wynosi:" +  arUczeKLasy.length);
+//    		 
+//    		for(  iloscRadioBtn = 0; iloscRadioBtn < arUczeKLasy.length; iloscRadioBtn ++)
+//    		{ 
+//    			radiobtn[iloscRadioBtn] = new JRadioButton("wq");
+//    			p3.add(radiobtn[iloscRadioBtn]); 
+//    		}
+//    		
+//    		JRadioButton rdbtn = new JRadioButton("eee");
+//    		p3.add(rdbtn);
+    		
+//    		radiobtn = new JRadioButton();
+//    	    JRadioButton male = new JRadioButton("male");
+//    	     JRadioButton female = new JRadioButton("Female");
+//    	     ButtonGroup bG = new ButtonGroup();
+//    	     bG.add(male);
+//    	     bG.add(female);
+    		
+    		
+    		// start: cbx1 
+    		final JComboBox cbx1 = new JComboBox(opt1);
+    		cbx1.setRenderer(new MyComboBoxRenderer1("Lekcje"));
+    		cbx1.setSelectedIndex(-1);
+    		cbx1.setEnabled(false);
+    		cbx1.setBackground(Color.WHITE);
+    		cbx1.addActionListener(new ActionListener() {
+    			public void actionPerformed(ActionEvent e) {
+    				{
+
+    					// Object selected = cbx2.getSelectedItem();
+    					if (cbx1.getSelectedIndex() == 0) {
+    						System.out.println("Wybrano: Lista uczniow");
+    						try {
+    							//PlanLekcji pl = new PlanLekcji();
+    							//pl.wczytajDane(imieInazwisko, imieUzytkownika,
+    							//		nazwiskoUzytkownika, listOfAllClass,
+    							//		listClassIteach, KlasaWychowankowie);
+    							//frame.dispose();
+    						} catch (Exception ex) {
+    							System.out.println("Blad przy wyborze cbx1" + ex);
+    						}
+    					}
+
+    				}
+    			}
+    		});
+    		p2.add(cbx1);
+    		// end: cbx1
+
+    		// start: cbx2
+
+    		final JComboBox cbx2 = new JComboBox(opt2);
+    		cbx2.setRenderer(new MyComboBoxRenderer2("Oceny"));
+    		cbx2.setSelectedIndex(-1);
+    		cbx2.setBackground(Color.WHITE);
+    		cbx2.addActionListener(new ActionListener() {
+    			public void actionPerformed(ActionEvent e) {
+    				{
+    					// Object selected = cbx2.getSelectedItem();
+    					if (cbx2.getSelectedIndex() == 0) {
+//    						System.out.println("Uruchomiono: Oceny semestr I");
+//    						String wybranaKlasa = comboBox.getSelectedItem().toString();
+//     
+//    						DziennikOcen dziennikOcen = new DziennikOcen();
+//    						dziennikOcen.createGui(imieInazwisko, imieUzytkownika,
+//    								nazwiskoUzytkownika, listOfAllClass,
+//    								listClassIteach, KlasaWychowankowie, wybranaKlasa  );
+//    						System.out.println("Wybrana klasa to: " + imieInazwisko);
+//    						System.out.println("Wybrana klasa to: " + imieUzytkownika);
+//    						System.out.println("Wybrana klasa to: " + nazwiskoUzytkownika);
+//    						System.out.println("Wybrana klasa to: " + listOfAllClass);
+//    						System.out.println("Wybrana klasa to: " + listClassIteach[]);
+//    						System.out.println("Wybrana klasa to: " + KlasaWychowankowie);
+//    						System.out.println("Wybrana klasa to: " + wybranaKlasa);
+//    						
+    						
+    					}
+
+    					if (cbx2.getSelectedIndex() == 1) {
+    						System.out.println("Wybrano: sem II");
+    					}
+    					if (cbx2.getSelectedIndex() == 2) {
+    						System.out.println("Wybrano: oceny na wywiadowke");
+    					}
+    					// String choosenClass = (String)
+    					// comboBox.getSelectedItem();
+    					// frame.dispose();
+    					// OcenyRUN( choosenClass, true) ;
+    				}
+    			}
+    		});
+    		p2.add(cbx2);
+    		// end: cbx2
+
+    		// start: cbx3
+
+    		final JComboBox cbx3 = new JComboBox(opt3);
+    		cbx3.setRenderer(new MyComboBoxRenderer3("Obecnosci"));
+    		cbx3.setSelectedIndex(-1);
+    		cbx3.setBackground(Color.WHITE);
+    		cbx3.addActionListener(new ActionListener() {
+    			public void actionPerformed(ActionEvent e) {
+    				{
+    					if (cbx3.getSelectedIndex() == 0) {
+    						String przedmiot = opt3[0];
+    						//ListaObecnosci listaObecnosci = new ListaObecnosci();
+    						ListaObecnosci.createGui(imieInazwisko, strDay, przedmiot);
+    					}
+
+    					if (cbx3.getSelectedIndex() == 1) {
+    						// cos ..
+    					}
+    					if (cbx3.getSelectedIndex() == 2) {
+    						// cos ..
+    					}
+    					// String choosenClass = (String)
+    					// comboBox.getSelectedItem();
+    					// frame.dispose();
+    					// OcenyRUN( choosenClass, true) ;
+    				}
+    			}
+    		});
+    		p2.add(cbx3);
+
+    		// end: cbx3
+
+    		// start: cbx4
+    		final JComboBox cbx4 = new JComboBox(opt4);
+    		cbx4.setRenderer(new MyComboBoxRenderer4("Uczniowie"));
+    		cbx4.setSelectedIndex(-1);
+    		cbx4.setBackground(Color.WHITE);
+    		cbx4.addActionListener(new ActionListener() {
+    			public void actionPerformed(ActionEvent e) {
+    				{
+
+    					// Object selected = cbx2.getSelectedItem();
+    					if (cbx4.getSelectedIndex() == 0) {
+    						System.out.println("Wybrano: Lista uczniow");
+    						try {
+    							ListaUczniow.main(args);
+    						} catch (Exception ex) {
+    							System.out.println("Blad przy wyborze cbx2" + ex);
+    						}
+    					}
+
+    					if (cbx4.getSelectedIndex() == 1) {
+    						frame.setVisible(false);
+    						AddStudent.main(args);
+    						System.out.println("Wybrano: Dodaj ucznia");
+    					}
+
+    					// String choosenClass = (String)
+    					// comboBox.getSelectedItem();
+    					// frame.dispose();
+    					// OcenyRUN( choosenClass, true) ;
+    				}
+    			}
+    		});
+    		p2.add(cbx4);
+    		// end: cbx4
+
+    		// start: cbx5
+    		final JComboBox cbx5 = new JComboBox(opt5);
+    		cbx5.setRenderer(new MyComboBoxRenderer5("Zachowanie i uwagi"));
+    		cbx5.setSelectedIndex(-1);
+    		cbx5.setBackground(Color.WHITE);
+    		p2.add(cbx5);
+    		// end: cbx5
+
+    		// start: cbx6
+    		final JComboBox cbx6 = new JComboBox(opt6);
+    		cbx6.setRenderer(new MyComboBoxRenderer6("Raporty i zestawienia"));
+    		cbx6.setSelectedIndex(-1);
+    		cbx6.setBackground(Color.WHITE);
+    		p2.add(cbx6);
+    		// end: cbx6
+
+    		// start: cbx7
+    		final JComboBox cbx7 = new JComboBox(opt7);
+    		cbx7.setRenderer(new MyComboBoxRenderer6("Zarz¹dzaj"));
+    		cbx7.setSelectedIndex(-1);
+    		cbx7.setBackground(Color.WHITE);
+    		p2.add(cbx7);
+    		// end: cbx7
+
+    		// start: cbx8
+    		final JComboBox cbx8 = new JComboBox(opt8);
+    		cbx8.setRenderer(new MyComboBoxRenderer6("Wyszukaj"));
+    		cbx8.setSelectedIndex(-1);
+    		cbx8.setBackground(Color.WHITE);
+    		p2.add(cbx8);
+    		// end: cbx8
+
+    		cbx1.setEnabled(false);
+    		cbx2.setEnabled(false);
+    		cbx3.setEnabled(false);
+    		cbx4.setEnabled(false);
+    		cbx5.setEnabled(false);
+    		cbx6.setEnabled(false);
+    		cbx7.setEnabled(false);
+
+    		lblSeparator = new JLabel();
+    		lblSeparator.setIcon(new ImageIcon(Wyszukiwanie.class
+    				.getResource("/res/sep1.png")));
+    		lblSeparator.setBackground(Color.WHITE);
+    		lblSeparator.setPreferredSize(new Dimension(10, 48));
+
+    		lblSeparator2 = new JLabel();
+    		lblSeparator2.setPreferredSize(new Dimension(10, 48));
+    		lblSeparator2.setIcon(new ImageIcon(Wyszukiwanie.class
+    				.getResource("/res/sep1.png")));
+    		lblSeparator2.setBackground(Color.WHITE);
+
+    		bModulKlas = new JButton("Zarz¹dzaj klas¹");
+    		bModulKlas.setBackground(Color.WHITE);
+    		bModulKlas.setPreferredSize(new Dimension(240, 30));
+    		bModulKlas.setIcon(new ImageIcon(Wyszukiwanie.class
+    				.getResource("/res/klasIcon.png")));
+    		bModulKlas.addActionListener(new ActionListener() {
+    			@Override
+    			public void actionPerformed(ActionEvent e) {
+    				//ZarzadzanieKlasami(imieInazwisko);
+    				//frame.setVisible(false);
+    			}
+    		});
+    		
+    		List<String> list;
+    	try
+    	{  
 		
-		List<String> list;
 		//TODO: zostala zmieniona ponizsza linijka  z list = Files.readAllLines(Paths.get("C:/dziennik/users/Michal Klich/studenci.txt" ), StandardCharsets.UTF_8); na:
 		// i nie dziala bo brak pliku txt studenci. stworzyc wyjatek
 		//File fStudenci = new File("C:/dziennik/users/Michal Klich/studenci.txt" );
-		list = Files.readAllLines(Paths.get("C:/dziennik/users/" + imie + " " + nazwisko + "/studenci.txt" ), StandardCharsets.UTF_8);
-		
-		
-		String[] personaliaUczniow = list.toArray(new String[list.size()]);
+    		System.out.println("Wyswietl mi tu tá persone " + persona);
+		list = Files.readAllLines(Paths.get("C://DziennikElektroniczny//users/" + persona + "//klasyInfo//"+ wybranyDziennik + "/studenci.txt" ), StandardCharsets.UTF_8);
+		System.out.println("Komunikat testowy 1");
+		String[] personaliaUczniow = list.toArray(new String[list.size()]); 
 		int dl = personaliaUczniow.length;
 		String[] imiona = new String[dl];
 		String[] nazwiska = new String[dl];
@@ -346,9 +606,9 @@ public class DziennikOcen extends  JFrame implements ActionListener{
 		{
 			 lp[i] = i+1; 
 		}
-		
+    	
 		//tworzenie nazw nag³owków tabeli, i 2wymiarowej tablicy pobieraj¹cej personalia studentów i umieszcza ich w tabeli DataEntries
-		String[] columnTitles = { "Lp.", "Imie", "Nazwisko", "Aktyw.", "Odp. ustna", "Praca dom.", "Spr.", "Praca kl.", "Œr.", "Oc. koñcowa" }; 
+		String[] columnTitles = { "Lp.", "Imie", "Nazwisko", "Aktyw.", "Odp. ustna", "Praca dom.", "Spr.", "Praca kl.", "Sr.", "Oc. koncowa" }; 
 	    Object[][] dataEntries = new Object[dl][10];
 	    
 	    Student sss = new Student();
@@ -356,9 +616,9 @@ public class DziennikOcen extends  JFrame implements ActionListener{
 	    for(int i = 0 ; i<imiona.length ; i++)
 	    {
 	    	dataEntries[i][0] = lp[i] + ".";
-	        dataEntries[i][1] = imiona[i]; 
+	        dataEntries[i][1] = sss.getStudentFirstName(i, imieInazwisko, wybranyDziennik);
 	        dataEntries[i][2] = nazwiska[i];
-	        dataEntries[i][3] = sss.getStudentFirstName(i);
+	        dataEntries[i][3] = "";
 	        dataEntries[i][4] = "";
 	        dataEntries[i][5] = "";
 	        dataEntries[i][6] = "";
@@ -367,16 +627,17 @@ public class DziennikOcen extends  JFrame implements ActionListener{
 	        dataEntries[i][9] = "";
 	    }
 	    
+	    
 	    TableModel model = new EditableTableModel(columnTitles, dataEntries);
 	    JTable table = new JTable(model);
 	    table.setFont(new Font("Tahoma", Font.BOLD, 11));
 	    table.createDefaultColumnsFromModel();
 	    table.setRowHeight( 35);
- 
-	    
-	    String[] statusObecnosci = { "Obecny", "Nieobecny", "Spozniony", "Usprawiedliwiony" };
-	    JComboBox comboBox1 = new JComboBox(statusObecnosci);
-	    table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(comboBox1));
+  
+	  //  String[] statusObecnosci = { "Obecny", "Nieobecny", "Spozniony", "Usprawiedliwiony" };
+	  //  @SuppressWarnings("rawtypes")
+		//JComboBox comboBox1 = new JComboBox(statusObecnosci);
+	//    table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(comboBox1));
 	
 	    DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 	    centerRenderer.setHorizontalAlignment( JLabel.LEFT );
@@ -405,14 +666,8 @@ public class DziennikOcen extends  JFrame implements ActionListener{
 		//scrollPaneTable.setBounds(400, 400, 450, 322);
 		scrollPaneTable.setBackground(Color.red); 
 		scrollPaneTable.setPreferredSize(new Dimension(600,340));
-	 
+	     
 		
- 
-		
-		JPanel pNawigacji = new JPanel();
-		
-		
- 
 		
 		JPanel pInformacyjny = new JPanel();
 		pInformacyjny.setLayout(new BorderLayout());
@@ -434,13 +689,28 @@ public class DziennikOcen extends  JFrame implements ActionListener{
 		//tworzenie mojego layout'u: (3 rzedy, 1 kolumna)
 		//TODO: zmieniæ na 'new GridLayout(3,1) i stwrzyæ trzeci panel z nawigacj¹. póki co new GridLayout (2,1).
 	GridLayout experimentLayoutThreeOne = new GridLayout(0,1);
+	FlowLayout flowLayout = new FlowLayout();
+	
 	
 	GridLayout layoutZespolone = new GridLayout(1,2);
 	
 	//tworzenie panelu z trzema pierwszymi panelami 
-	final JPanel pCompsToExperiment = new JPanel();
-	pCompsToExperiment.setLayout(experimentLayoutThreeOne);
+	final JPanel panelDodajacyDoNorth = new JPanel();
+	panelDodajacyDoNorth.setLayout(experimentLayoutThreeOne);
 	
+	JPanel pNawigacji = new JPanel();
+	FlowLayout flowL = new FlowLayout(); 
+	pNawigacji.setLayout(flowL);
+	
+	JPanel pWybierzKlase = new JPanel();
+	pWybierzKlase.setLayout(flowL);
+	
+	
+	JLabel lbl1 = new JLabel("Jesteœ tu: Strona domowa  =>");
+	JLabel lbl2 = new JLabel(" Dziennik Ocen: " + wybranyDziennik);
+	
+	pNawigacji.add(lbl1, BorderLayout.SOUTH); 
+	pNawigacji.add(lbl2, BorderLayout.SOUTH); 
 	//tworzenie panelu ktory zawiera panel narzedzi i panel tresci
 	JPanel pZespolone = new JPanel();
 	pZespolone.setLayout(layoutZespolone);
@@ -529,7 +799,7 @@ public class DziennikOcen extends  JFrame implements ActionListener{
 	lblWidok.setBackground(Color.BLACK);
 	pLewy.add(lblWidok);
 	
-	  bZapiszTabele = new JButton("bZapiszTabele");
+	bZapiszTabele = new JButton("bZapiszTabele");
 	bZapiszTabele.setBorder(emptyBorder);
 	bZapiszTabele.setBounds(250, 410, 150, 30);
 	bZapiszTabele.setBackground(Color.white);
@@ -593,15 +863,62 @@ public class DziennikOcen extends  JFrame implements ActionListener{
 		pInfo.add(button, c);
 		
 		//ustawianie preferowanych rozmiarow
-		pCompsToExperiment.setPreferredSize(new Dimension(1360, 200));
+		//panelDodajacyDoNorth.setPreferredSize(new Dimension(1360, 200));
 	 
-	  	
+	  	/**
+	  	 * Zapisywanie ocen
+	  	 */
+		JButton btnZapiszOceny = new JButton("Zapisz oceny");
+		btnZapiszOceny.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e)
+			{	 
+			  
+				String strOceny ="C://DziennikElektroniczny/users//" + imieUzytkownika + " " + nazwiskoUzytkownika + "//klasyInfo//" + wybranyDziennik + "//oceny.txt";  
+			    File fOceny = new File(strOceny);
+				PrintWriter os; 
+				 
+				PrintWriter writer;
+				try {
+					writer = new PrintWriter(fOceny);
+					writer.print("");
+					writer.close();
+				} catch (FileNotFoundException e2) 
+				{
+					e2.printStackTrace();
+				}
+				
+				
+				try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fOceny, true))))
+				{
+				
+					for (int row = 0; row < table.getRowCount(); row++) {
+				    for (int col = 0; col < table.getColumnCount(); col++) {
+				    	out.println(table.getColumnName(col));
+				    	out.print(": ");
+				    	out.println(table.getValueAt(row, col));
+				    	JOptionPane.showMessageDialog(null, "Pomyœlnie dodano wartoœæ z tabeli do oceny.txt");  
+				    }
+					}
+				  
+				} 
+						  catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} 
+			}
+		});
+		p3.add(btnZapiszOceny);
+		
+
+	 
 		//Add komponentów to experiment with Grid Layout
-		pCompsToExperiment.add(p1); // dodanie p1 ktory jest boxlayoutem
-		pCompsToExperiment.add(p2);
+		panelDodajacyDoNorth.add(p1); // dodanie p1 ktory jest boxlayoutem 
+		panelDodajacyDoNorth.add(p2);
+		panelDodajacyDoNorth.add(pNawigacji);
+		panelDodajacyDoNorth.add(p3);
 		
-		
-		frame.add(pCompsToExperiment, BorderLayout.NORTH);
+		 
+		frame.add(panelDodajacyDoNorth, BorderLayout.NORTH);
 		frame.add(pZespolone, BorderLayout.CENTER);
 		frame.add(pInfo, BorderLayout.SOUTH);
 		
@@ -612,30 +929,19 @@ public class DziennikOcen extends  JFrame implements ActionListener{
 		frame.pack();
         frame.setVisible(true);
         frame.setSize(1360, 750);
-		}	
-	catch (Exception ex) {
-		
-	}
-	
-	}
-	
-	public void actionPerformed(ActionEvent e) {
-		Object source = e.getSource();
-
-		if(source == rb1 && !rb1.isSelected())
-		{
-			 scrollPaneTable.setVisible(false);
-		}
-		if(source == rb1 && rb1.isSelected()) scrollPaneTable.setVisible(true);
-		
-		else if(source == bZapiszTabele)
-		{
-			zapiszTabele(e);
-		}
 		 
-		//else if(source == blueButton)
-		//	...
-	}
+	    
+	    
+	    
+    	}
+		catch (Exception ex) {
+			System.out.println(ex);
+			System.out.println("persona:" + persona);
+		}
+	
+    }
+	
+
 	
 	public void zapiszTabele(ActionEvent e) 
 	{
@@ -696,5 +1002,247 @@ public class DziennikOcen extends  JFrame implements ActionListener{
 		return lp + ": " + imie + "nazwisko: " + nazwisko;
 	}
 	
-	
+	class MyComboBoxRenderer extends JLabel implements ListCellRenderer {
+		private String _title;
+
+		public MyComboBoxRenderer(String title) {
+			_title = title;
+
+		}
+
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean hasFocus) {
+			if (index == -1 && value == null) {
+				setText(_title);
+			}
+
+			else {
+				setText(value.toString());
+			}
+			return this;
+		}
+
+	}
+
+	// ----------------END: combox 0 ---------------
+
+	// -----------------START: Combobox 1---------------------
+	String[] opt1 = { "Wyswietl plan lekcji" };
+
+	class MyComboBoxRenderer1 extends JLabel implements ListCellRenderer {
+		private String _title;
+
+		public MyComboBoxRenderer1(String title) {
+			_title = title;
+		}
+
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean hasFocus) {
+			if (index == -1 && value == null)
+				setText(_title);
+			else
+				setText(value.toString());
+			return this;
+		}
+	}
+
+	// -----------------KONIEC: Combobox 1---------------------
+
+	// -----------------START: Combobox 2---------------------
+	String[] opt2 = { "Semestr I", "Semestr II", "Wydrukuj oceny na wywiadówke" };
+
+	class MyComboBoxRenderer2 extends JLabel implements ListCellRenderer {
+
+		private String _title;
+
+		public MyComboBoxRenderer2(String title) {
+			_title = title;
+		}
+
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean hasFocus) {
+			if (index == -1 && value == null)
+				setText(_title);
+			else
+				setText(value.toString());
+			return this;
+		}
+	}
+
+	// -----------------KONIEC: Combobox 2---------------------
+
+	// -----------------START: Combobox 3---------------------
+	// String[] opt3 = {"Bie¿¹cy tydzieñ", "Poprzedni tydzieñ" ,
+	// "Frekwencja Semestr I", "Frekwencja Semestr II", "Polski", "Matematyka",
+	// "Geografia", przedmioty[0]};
+	String[] opt3 = { "Polski", "Matematyka", "Geografia", przedmioty[0] };
+
+	class MyComboBoxRenderer3 extends JLabel implements ListCellRenderer {
+		private String _title;
+
+		public MyComboBoxRenderer3(String title) {
+			_title = title;
+		}
+
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean hasFocus) {
+			if (index == -1 && value == null)
+				setText(_title);
+			else
+				setText(value.toString());
+			return this;
+		}
+	}
+
+	// -----------------KONIEC: Combobox 3---------------------
+
+	// -----------------START: Combobox 4---------------------
+	String[] opt4 = { "Lista uczniów", "Dodaj ucznia" }; // opcjonalnie dodaæ
+															// tutaj wszystkich
+															// uczniów by byli
+															// wyœwietleni od
+															// razu w comboxie
+
+	class MyComboBoxRenderer4 extends JLabel implements ListCellRenderer {
+		private String _title;
+
+		public MyComboBoxRenderer4(String title) {
+			_title = title;
+		}
+
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean hasFocus) {
+			if (index == -1 && value == null)
+				setText(_title);
+			else
+				setText(value.toString());
+			return this;
+		}
+	}
+
+	// -----------------KONIEC: Combobox 4---------------------
+
+	// -----------------START: Combobox 5---------------------
+	String[] opt5 = { "Dziennik uwag", "Dodaj now¹ uwagê",
+			"Podgl¹d ocen z zachowania, semestr I",
+			"Podgl¹d ocen z zachowania, semestr II" }; // opcjonalnie dodaæ
+														// tutaj wszystkich
+														// uczniów by byli
+														// wyœwietleni od razu w
+														// comboxie
+
+	class MyComboBoxRenderer5 extends JLabel implements ListCellRenderer {
+		private String _title;
+
+		public MyComboBoxRenderer5(String title) {
+			_title = title;
+		}
+
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean hasFocus) {
+			if (index == -1 && value == null)
+				setText(_title);
+			else
+				setText(value.toString());
+			return this;
+		}
+	}
+
+	// -----------------KONIEC: Combobox 5---------------------
+
+	// -----------------START: Combobox 6---------------------
+	String[] opt6 = { "Statystyki klasy", "Podsumowanie ocen semestr I",
+			"Podsumowanie ocen semestr I", "Podsumowanie ocen semestr II",
+			"Zestawienie frekwencji" }; // opcjonalnie dodaæ tutaj wszystkich
+										// uczniów by byli wyœwietleni od razu w
+										// comboxie
+
+	class MyComboBoxRenderer6 extends JLabel implements ListCellRenderer {
+		private String _title;
+
+		public MyComboBoxRenderer6(String title) {
+			_title = title;
+		}
+
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean hasFocus) {
+			if (index == -1 && value == null)
+				setText(_title);
+			else
+				setText(value.toString());
+			return this;
+		}
+	}
+
+	// -----------------KONIEC: Combobox 6---------------------
+
+	// -----------------START: Combobox 6---------------------
+	String[] opt7 = { "Zarz¹dzaj klas¹", "Zarz¹dzaj ocenami",
+			"Zarz¹dzaj obecnoœciami", "Odwo³aj lekcje", "Zaplanuj wywiadówkê",
+			"Zaplanuj wycieczkê" }; // opcjonalnie dodaæ tutaj wszystkich
+									// uczniów by byli wyœwietleni od razu w
+									// comboxie
+
+	class MyComboBoxRenderer7 extends JLabel implements ListCellRenderer {
+		private String _title;
+
+		public MyComboBoxRenderer7(String title) {
+			_title = title;
+		}
+
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean hasFocus) {
+			if (index == -1 && value == null)
+				setText(_title);
+			else
+				setText(value.toString());
+			return this;
+		}
+	}
+
+	// -----------------KONIEC: Combobox 6---------------------
+
+	// -----------------START: Combobox 6---------------------
+	String[] opt8 = { "Wyszukaj ucznia", "Wyszukiwanie zaawansowane" }; // opcjonalnie
+																		// dodaæ
+																		// tutaj
+																		// wszystkich
+																		// uczniów
+																		// by
+																		// byli
+																		// wyœwietleni
+																		// od
+																		// razu
+																		// w
+																		// comboxie
+
+	class MyComboBoxRenderer8 extends JLabel implements ListCellRenderer {
+		private String _title;
+
+		public MyComboBoxRenderer8(String title) {
+			_title = title;
+		}
+
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean hasFocus) {
+			if (index == -1 && value == null)
+				setText(_title);
+			else
+				setText(value.toString());
+			return this;
+		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
 }
